@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load static %}
+{% load compress %}
+
+{% block header_content %}
+    <div class="help__header">
+        <h1 class="help__header_title">How can we help?</h1>
+    </div>
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'helps/css/custom.css' %}">
+<link rel="stylesheet" href="{% static 'helps/css/slick.css' %}">
+<link rel="stylesheet" href="{% static 'helps/css/slick_theme.css' %}">
+    <div class="help__content">
+        <div class="help__content_header">Choose a category to get started</div>
+        <div class="help__content_body">
+            <div class="help__content_row">
+                <a href="#" class="help__content_widget">
+                <div class="widget_header">
+                    <img src="{% static 'design/images/logo.svg' %}" alt="help_introduction" />
+                </div>
+                <div class="widget_content">
+                    <span class="widget_content_title">Introduction to Data</span>
+                    <div class="widget_content_body">This is a description that will go for a few rows. Lorem ipsum dolor sit amet, consectetur adipiscing elit ut aliquam, purus sit amet luctus venenatis.</div>
+                </div>
+            </a>
+                <a href="#" class="help__content_widget">
+                    <div class="widget_header">
+                        <img src="{% static 'design/images/logo.svg' %}" alt="help_introduction" />
+                    </div>
+                    <div class="widget_content">
+                        <span class="widget_content_title">Introduction to Data</span>
+                        <div class="widget_content_body">This is a description that will go for a few rows. Lorem ipsum dolor sit amet, consectetur adipiscing elit ut aliquam, purus sit amet luctus venenatis.</div>
+                    </div>
+                </a>
+                <a href="#" class="help__content_widget">
+                    <div class="widget_header">
+                        <img src="{% static 'design/images/logo.svg' %}" alt="help_introduction" />
+                    </div>
+                    <div class="widget_content">
+                        <span class="widget_content_title">Introduction to Data</span>
+                        <div class="widget_content_body">This is a description that will go for a few rows. Lorem ipsum dolor sit amet, consectetur adipiscing elit ut aliquam, purus sit amet luctus venenatis.</div>
+                    </div>
+                </a>
+            </div>
+            <div class="help__content_row" style="margin-top: 25px;">
+                <a href="#" class="help__content_widget">
+                <div class="widget_header">
+                    <img src="{% static 'design/images/logo.svg' %}" alt="help_introduction" />
+                </div>
+                <div class="widget_content">
+                    <span class="widget_content_title">Introduction to Data</span>
+                    <div class="widget_content_body">This is a description that will go for a few rows. Lorem ipsum dolor sit amet, consectetur adipiscing elit ut aliquam, purus sit amet luctus venenatis.</div>
+                </div>
+            </a>
+                <a href="#" class="help__content_widget">
+                    <div class="widget_header">
+                        <img src="{% static 'design/images/logo.svg' %}" alt="help_introduction" />
+                    </div>
+                    <div class="widget_content">
+                        <span class="widget_content_title">Introduction to Data</span>
+                        <div class="widget_content_body">This is a description that will go for a few rows. Lorem ipsum dolor sit amet, consectetur adipiscing elit ut aliquam, purus sit amet luctus venenatis.</div>
+                    </div>
+                </a>
+                <a href="#" class="help__content_widget">
+                    <div class="widget_header">
+                        <img src="{% static 'design/images/logo.svg' %}" alt="help_introduction" />
+                    </div>
+                    <div class="widget_content">
+                        <span class="widget_content_title">Introduction to Data</span>
+                        <div class="widget_content_body">This is a description that will go for a few rows. Lorem ipsum dolor sit amet, consectetur adipiscing elit ut aliquam, purus sit amet luctus venenatis.</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="help__content_header">Hot Topics</div>
+        <div class="help__content_body">
+            <div class="topic_slicks">
+                <div class="topic_child">
+                    <span>Selecting the Correct Stream Processor</span>
+                </div>
+                <div class="topic_child">
+                    <span>Begginer’s Guide</span>
+                </div>
+                <div class="topic_child">
+                    <span>Stream Processor Not Working?</span>
+                </div>
+                <div class="topic_child">
+                    <span>Kafka ver. 2.435</span>
+                </div>
+                <div class="topic_child">
+                    <span>Kafka ver. 2.435</span>
+                </div>
+                <div class="topic_child">
+                    <span>Kafka ver. 2.435</span>
+                </div>
+                <div class="topic_child">
+                    <span>Kafka ver. 2.435</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script src="{% static 'helps/js/slick.js' %}"></script>
+    <script src="{% static 'helps/js/help.js' %}"></script>
+{% endblock %}

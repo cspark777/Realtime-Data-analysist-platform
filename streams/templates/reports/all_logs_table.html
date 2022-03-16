@@ -1,0 +1,107 @@
+<table id="floating-window-source-data" class="display" style="width: 100%"></table>
+<script>
+    $(document).ready(function () {
+        let floatingWindowSourceData = $('#floating-window-source-data');
+        if (floatingWindowSourceData.length) {
+            jQuery.ajax({
+                url: '{% url 'projects:streamprocessors:get_logs_headers' project_id=current_project.id %}',
+                type: "GET",
+                async: false,
+                success: function (response) {
+                    let project_select = response.projects.map(function (obj) {
+                        return `<option value=${obj.id}>${obj.name}</option>`
+                    }).join("\n");
+                    $('#project').append(project_select);
+
+                    let processor_options = response.processors.map(function (obj) {
+                        return `<option value=${obj.id} data-type="processor">Stream Processor - ${obj.name}</option>`
+                    }).join("\n");
+
+                    let simulation_options = response.simulations.map(function (obj) {
+                        return `<option value=${obj.id} data-type="simulation">Simulation - ${obj.name}</option>`
+                    }).join("\n");
+
+                    $('#process').append(processor_options+simulation_options);
+                }
+            });
+
+            let data = {
+                'project': $('#project').val(),
+                'processor': getSelectedProcessor(),
+                'priority': $('#priority').val(),
+                'simulation': getSelectedSimulator()
+            };
+
+            let columns = [
+                {"data": "__time", "width": "10%", "title": "Date"},
+                {"data": "component", "width": "10%", "title": "Component"},
+                {"data": "message", "width": "70%", "title": "Message"},
+                {"data": "process", "width": "5%", "title": "Process"},
+            ];
+
+            floatingWindowSourceData.DataTable({
+                ajax: {
+                    "type": "GET",
+                    "url": '{% url "projects:streamprocessors:get_logs_rows" project_id=current_project.id%}',
+                    "data": data
+                },
+                columns: columns,
+                order: [[0, "desc"]],
+                dom: 'rt<"bottom"lfip>',
+                language: {
+                    emptyTable: "No Data Available in table",
+                    searchPlaceholder: "Search",
+                    search: ""
+                },
+                pageLength: 50,
+            });
+
+            sessionStorage.setItem("open", "true");
+            {# asyncF(); #}
+        }
+
+        $('#apply_filter').on('click', filter);
+
+        function filter() {
+            asyncF(true);
+        }
+    });
+
+    const getSelectedSimulator = () => {
+        let requestedProcessType = $('#process').find(':selected').data('type');
+        return requestedProcessType === 'simulation' ? $('#process').val() : undefined;
+    };
+
+    const getSelectedProcessor = () => {
+        let requestedProcessType = $('#process').find(':selected').data('type');
+        return requestedProcessType === 'processor' ? $('#process').val() : undefined;
+    };
+
+    const asyncDelay = ms => {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    };
+    const asyncF = async (once_only) => {
+        let floatingWindowSourceData = $('#floating-window-source-data');
+        let data = {
+            'component': $('#component').val(),
+            'project': $('#project').val(),
+            'processor': getSelectedProcessor(),
+            'priority': $('#priority').val(),
+            'simulation': getSelectedSimulator()
+        };
+
+        floatingWindowSourceData.dataTable().fnClearTable();
+
+        const r = await jQuery.ajax({
+            url: '{% url "projects:streamprocessors:get_logs_rows" project_id=current_project.id %}',
+            data: data
+        });
+
+        floatingWindowSourceData.DataTable().rows.add(r.data);
+        floatingWindowSourceData.DataTable().draw(false);
+        if (!once_only) {
+            await asyncDelay(3000);
+            return asyncF();
+        }
+    };
+</script>

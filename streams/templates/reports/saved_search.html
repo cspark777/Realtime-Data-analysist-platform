@@ -1,0 +1,47 @@
+{% load extras %}
+
+<table id="searchTable_{{ report_item.id }}" class="display nowrap dt-left"></table>
+
+
+<script>
+    function getSearchData_{{ report_item.id }}() {
+        {% with search=searches|get_item:report_item.id %}
+        const stream = '{{ search.stream }}';
+        const searchData =  JSON.parse(`{{ search.search_data|safe }}`);
+        {% endwith %}
+
+        let schemaFields = {{ schema_fields|get_item:report_item.id|safe }};
+        const filter = $.map(Object.keys(searchData), key => {
+            return `${key}='${searchData[key]}'`;
+        }).join(' AND ').split(' ').join('%20');
+
+        const SEARCH_URL = "{% url 'projects:streamprocessors:source_events' project_id=current_project.id object_id=0 %}";
+        const fields = ['__time'].concat(schemaFields);
+        const columns = fields.map(field => {
+            return {'data': field, 'title': (field === '__time' ? 'Time' : field)}
+        });
+
+        return {
+            url: `${SEARCH_URL}?search_stream=${stream}&filter=${filter}`,
+            columns: columns
+        }
+    }
+
+    $(document).ready(function () {
+        const monitorSourceDataTable = $('#searchTable_{{ report_item.id }}');
+        const searchData = getSearchData_{{ report_item.id }}();
+
+        monitorSourceDataTable.DataTable({
+            "ajax": {
+                "type": "GET",
+                "url": searchData.url,
+                "error": function (xhr, error, code) {
+                    console.log(code);
+                    $('.dataTables_empty').remove();
+                }
+            },
+            "columns": searchData.columns,
+            "order": [[0, 'desc']],
+        });
+    });
+</script>

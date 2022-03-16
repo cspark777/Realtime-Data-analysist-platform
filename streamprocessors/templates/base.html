@@ -1,0 +1,165 @@
+{% load static %}
+{% load compress %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>DATA | Analytics Console</title>
+    <meta charset="utf-8">
+
+    {% compress css inline %}
+        <link href="{% static 'design/css/index.css' %}" rel="stylesheet" type="text/css" media="screen">
+    {% endcompress %}
+
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="description" content="DATA Console"/>
+    <meta name="author" content=""/>
+
+    <link rel="stylesheet"
+          href="{% static 'streamprocessors/js/jquery-ui/css/no-theme/jquery-ui-1.10.3.custom.min.css' %}">
+    <link rel="stylesheet" href="{% static 'streamprocessors/css/font-icons/entypo/css/entypo.css' %}">
+
+
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'streamprocessors/images/apple-touch-icon.png' %} ">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'streamprocessors/images/favicon1.png' %} ">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'streamprocessors/images/favicon-16x16.png' %}">
+    
+    <link rel="stylesheet" href="{% static 'streamprocessors/css/neon-core.css' %}">
+    <link rel="stylesheet" href="{% static 'streamprocessors/css/neon-theme.css' %}">
+    <link rel="stylesheet" href="{% static 'streamprocessors/css/neon-forms.css' %}">
+    <link rel="stylesheet" href="{% static 'streamprocessors/css/modal-screen.css' %}">
+    <link rel="stylesheet" href="{% static 'streamprocessors/css/custom.css' %}">
+    <link rel="stylesheet"
+          href="{% static 'streamprocessors/js/datatables/DataTables-1.10.9/css/jquery.dataTables.min.css' %}">
+    {% block extra_styles %}{% endblock %}
+
+    {#    <script src="{% static 'streamprocessors/js/jquery-1.11.3.min.js' %}"></script>#}
+
+    <style>
+        .table-bordered > thead > tr > td {
+            background-color: darkslategray;
+            border-bottom-width: 0px;
+            color: white;
+            border-bottom: 0 !important;
+            text-transform: capitalize;
+            padding: 12px;
+            /* box-shadow: 3px 11px black; */
+        }
+
+        body {
+            font-size: 13px;
+        }
+
+        .form-control {
+            display: block;
+            width: 100%;
+            height: 41px;
+            padding: 6px 12px;
+            font-size: 13px;
+            line-height: 1.42857143;
+            color: #555555;
+            background-color: #fff;
+            background-image: none;
+            border: 1px solid #ebebeb;
+            border-radius: 3px;
+            -webkit-box-shadow: inset 0 3px 3px rgba(0, 0, 0, 0.075);
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+            -webkit-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+            -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+            transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+        }
+
+        .page-container.horizontal-menu header.navbar ul.nav > li > a, .page-container.horizontal-menu header.navbar ul.nav > li > span {
+            color: #aaabae;
+            font-size: 13px;
+            line-height: 1.42857143;
+        }
+
+        .page-container.horizontal-menu header.navbar .navbar-nav > li > a span {
+            color: #aaabae;
+            font-size: 13px;
+            line-height: 2;
+        }
+    </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
+
+    <!-- UPDATE libs -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+            crossorigin="anonymous"></script>
+    <!-- end UPDATE libs -->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css"/>
+{#    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"#}
+{#            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"#}
+{#            crossorigin="anonymous"></script>#}
+{#    <script src="https://unpkg.com/gojs/release/go-debug.js"></script>#}
+</head>
+
+<body>
+{% include 'navigation_bar.html' %}
+
+{% block header_content %}{% endblock %}
+
+<main class="wrapper">
+    {% if messages %}
+        {% for message in messages %}
+            <span class="card__field card__field--green" data-header="">{{ message }}</span>
+        {% endfor %}
+    {% endif %}
+    {% block content %}{% endblock %}
+</main>
+
+<script src="{% static 'design/js/js.js' %}"></script>
+
+<!-- Bottom scripts (common) -->
+<script src="{% static 'streamprocessors/js/datatables/DataTables-1.10.9/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'streamprocessors/js/gsap/TweenMax.min.js' %}"></script>
+{#<script src="{% static 'streamprocessors/js/bootstrap.js' %}"></script>#}
+<script src="{% static 'streamprocessors/js/joinable.js' %}"></script>
+<script src="{% static 'streamprocessors/js/resizeable.js' %}"></script>
+<script src="{% static 'streamprocessors/js/neon-api.js' %}"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="{% static 'streamprocessors/js/jquery-ui/js/jquery-ui-1.10.3.minimal.min.js' %}"></script>
+
+<!-- JavaScripts initializations and stuff -->
+<script src="{% static 'streamprocessors/js/neon-custom.js' %}"></script>
+<script src="{% static 'streamprocessors/js/create_group.js' %}"></script>
+
+<!-- Demo Settings -->
+<script src="{% static 'streamprocessors/js/neon-demo.js' %}"></script>
+<script src="{% static 'streamprocessors/js/toastr.js' %}"></script>
+<script src="{% static 'streamprocessors/js/clipboard.js-master/dist/clipboard.min.js' %}"></script>
+
+{% block extra_scripts %}{% endblock %}
+
+<!-- Protootype DATA Logs Window -->
+{#{% if current_project %}#}
+{#    <button id="logs_button" style="position: fixed; right: 15px; bottom: 15px;"></button>#}
+{#    {% include 'reports/modal-screen.html' %}#}
+{#{% endif %}#}
+
+<script>
+    $('#developer-key').click(function () {
+        $(this).parent().html('<a style="color: #aaabae">{{ user.developer_key }} ' +
+            '<i class="entypo-book-open" style="cursor: pointer; margin-right: 0;" title="Copy"></i></a>');
+    });
+
+    $('.navbar-right').on('click', '.entypo-book-open', function () {
+        var $temp = $("<input>");
+        $("body").append($temp);
+        $temp.val($(this).parent().text()).select();
+        document.execCommand("copy");
+        $temp.remove();
+    });
+</script>
+
+</body>
+</html>

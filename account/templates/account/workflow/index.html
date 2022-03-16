@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+  <div class="row">
+    <div class="col-md-12">
+      <h2 class="project-name">{{ current_project }}</h2>
+      <h2 class="dashboard__header">Workflow Inbox</h2>
+      {% if workflows and data %}
+        <table class="table-styled" id="data-table">
+
+          <tbody>
+          <tr>
+            <th>Type</th>
+            <th>Project</th>
+            <th>Time</th>
+            <th>Task Title</th>
+            <th>Task Description</th>
+            <th>Assign To</th>
+            <th>Actions</th>
+          </tr>
+
+          {% for workflow in workflows %}
+            {% for result in page_obj.object_list %}
+              {% if result.workflow_id|safe == workflow.id|safe %}
+                <tr>
+                  {% with 'design/images/icon_'|add:workflow.type|add:'.png' as icon %}
+                    <td><img src="{% static icon %}" alt="{{ workflow.type }}" style="width: 25px;"></td>
+                  {% endwith %}
+                  <td>{{ workflow.streamprocessor_step.streamprocessor.project }}</td>
+                  <td>{{ workflow.created_at }}</td>
+                  <td>{{ result.task_title }}</td>
+                  <td>{{ result.task_description }}</td>
+                  <td><select class="form-control users">
+                    {% for custom_user in users %}
+                      <option value="{{ custom_user.id }}" {% if custom_user.id == user.id %}selected{% endif %}>
+                        {{ custom_user.first_name }} {{ custom_user.last_name }} <{{ custom_user.email }}>
+                      </option>
+                    {% endfor %}
+                  </select></td>
+                  <td>
+                    <a href="{% url 'account:workflow-delete' user_id=user.id workflow_id=workflow.id %}"
+                       class="card-action delete">
+                      <span class="helper">Delete</span>
+                    </a>
+                    <a href="?task={{ workflow.id }}&reassign=" class="card-action duplicate">
+                      <span class="helper">Reassign</span>
+                    </a>
+                  </td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+          {% endfor %}
+          </tbody>
+        </table>
+
+          {% if page_obj.has_other_pages %}
+            <div style="text-align: center; margin: 10px;">
+              <span>
+                  {% if page_obj.has_previous %}
+                      <a class="btn" href="?page=1">&laquo; First</a>
+                      <a class="btn" href="?page={{ page_obj.previous_page_number }}">&lsaquo; Previous</a>
+                  {% endif %}
+
+                  <span class="btn" style="opacity: 1; pointer-events: none;">
+                      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                  </span>
+
+                  {% if page_obj.has_next %}
+                      <a class="btn" href="?page={{ page_obj.next_page_number }}">Next &rsaquo;</a>
+                      <a class="btn" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                  {% endif %}
+              </span>
+            </div>
+          {% endif %}
+
+      {% else %}
+        <div class="empty">
+          <span class="empty__text">No tasks are available.</span>
+          <img src="{% static 'design/images/empty-inbox.svg' %}"
+               width="155" height="134" alt="no data" class="empty__image">
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+      $('.duplicate').on('click', function () {
+          var userId = $(this).parent().parent().find('select').find(':selected').val();
+          var elements = $(this).attr('href').split('=');
+          elements[elements.length - 1] = userId;
+          $(this).removeAttr('href');
+          $(this).attr('href', elements.join('='));
+      });
+  </script>
+
+{% endblock %}

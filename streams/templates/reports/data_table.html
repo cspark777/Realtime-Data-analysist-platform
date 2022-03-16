@@ -1,0 +1,39 @@
+{% load extras %}
+
+<div class="row">
+  <div class="col-sm-12">
+
+{#    <p>Total Records In Set: {{ source_data_rows_count }}</p>#}
+
+    <table id="monitor-source-data-table_{{ report_item.id }}" class="display" style="width:100%">
+      <thead>
+        <tr>
+          <th>Time</th>
+          {% for field in schema_fields|get_item:report_item.id %}
+            <th>{{ field }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+    </table>
+  </div>
+</div>
+
+<script>
+$(document).ready(function () {
+    let monitorSourceDataTable = $('#monitor-source-data-table_{{ report_item.id }}');
+    let schemaFields = {{ schema_fields|get_item:report_item.id | safe  }};
+    let columns = schemaFields.map(key => {
+        return {'data': key}
+    });
+    columns.unshift({'data': '__time', 'title': 'Time'});
+
+    monitorSourceDataTable.DataTable({
+      "ajax": {
+        "type": "GET",
+        "url": "{{ analysis_url }}"
+      },
+      "columns": columns,
+      "order": [[ 0, 'desc' ]]
+    });
+});
+</script>

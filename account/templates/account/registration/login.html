@@ -1,0 +1,34 @@
+{% load static %}
+{% load compress %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Data | Login</title>
+    {% compress css inline %}
+        <link href="{% static 'design/css/index.css' %}" rel="stylesheet" type="text/css" media="screen">
+    {% endcompress %}
+</head>
+<body class="login-screen">
+
+<a href="{% url 'account:login' %}" style="margin-bottom: 10px;">
+    <img src="{% static 'design/images/logo.png' %}" width="266" height="114" alt="Data">
+</a>
+
+<form autocomplete="off" method="post" role="form">
+    {% csrf_token %}
+    {% if form.errors.wrong_credentials %}
+        <span class="card__field card__field--red" style="color: red">Invalid Login or password.</span>
+    {% endif %}
+
+    <div class="input-email"><span class="input-email__icon"></span>{{ form.username }}</div>
+    <div class="input-password"><span class="input-password__icon"></span>{{ form.password }}</div>
+    <button class="btn" type="submit">Login</button>
+</form>
+
+<span>Don’t have an account? <a href="{% url 'account:signup' %}">Sign Up</a></span>
+
+<script src="{% static 'design/js/js.js' %}"></script>
+</body>
+</html>

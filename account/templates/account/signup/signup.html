@@ -1,0 +1,116 @@
+{% load static %}
+{% load compress %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Data | Sign Up</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    {% compress css inline %}
+        <link href="{% static 'design/css/index.css' %}" rel="stylesheet" type="text/css" media="screen">
+    {% endcompress %}
+
+    <style>
+        input.invalid {
+            background-color: #ffdddd;
+        }
+
+        .tab {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body class="login-screen">
+<a href="{% url 'account:login' %}" style="margin-bottom: 10px;">
+    <img src="{% static 'design/images/logo.png' %}" width="266" height="114" alt="Data">
+</a>
+
+<form autocomplete="off" method="post" role="form" id="regForm">
+    {% csrf_token %}
+    <div class="tab">
+        <div class="input-user"><span class="input-user__icon"></span>{{ form.first_name }}</div>
+        <div class="input-user"><span class="input-user__icon"></span>{{ form.last_name }}</div>
+        <div class="input-company"><span class="input-company__icon"></span>{{ form.organisation__company_name }}</div>
+        <button class="btn" type="submit" onclick="nextTab(this)">Next</button>
+        <div class="signup-step">
+            <a href="/" onclick="clearStorage()">Back to Login </a>
+            <span id="step">Step 1 of 2</span>
+        </div>
+    </div>
+</form>
+<div class="tab second-tab">
+    {% if form.errors.email %}
+        <span class="login-error login-error--email">
+           {{ form.errors.email|striptags }}
+        </span>
+    {% endif %}
+    <div class="input-email"><span class="input-email__icon"></span>{{ form.email }}</div>
+    <div class="input-password"><span class="input-password__icon"></span>{{ form.password1 }}</div>
+    <div class="input-password"><span class="input-password__icon"></span>{{ form.password2 }}</div>
+    {% if form.errors.password2 %}
+        <span class="login-error">
+           {{ form.errors.password2|striptags }}
+        </span>
+    {% endif %}
+    <button class="btn" type="submit" onclick="validateForm()">Submit</button>
+    <div class="signup-step">
+        <a href="/" onclick="clearStorage()">Back to Login </a>
+        <span id="step">Step 2 of 2</span>
+    </div>
+</div>
+
+<script src="{% static 'design/js/js.js' %}"></script>
+<script>
+    const tabs = $(".tab");
+    const secondTab = document.querySelector('.second-tab');
+    let currentTab = 0;
+    if (localStorage.getItem('afterSubmit')) {
+        currentTab = 1;
+        tabs[0].insertAdjacentElement("afterend", secondTab);
+    }
+    showTab(currentTab);
+
+    function clearStorage() {
+        localStorage.clear()
+    }
+
+    function showTab(n) {
+        tabs[n].style.display = "flex";
+    }
+
+    function nextTab(btn) {
+        if (validateForm()) {
+            tabs[currentTab].style.display = "none";
+            currentTab = 1;
+            showTab(currentTab);
+            // clear default error message for email field
+            btn.type = 'button';
+            tabs[0].insertAdjacentElement("afterend", secondTab);
+        }
+        return false;
+    }
+
+    function validateForm() {
+        let valid = true,
+            y,
+            i;
+        y = tabs[currentTab].getElementsByTagName("input");
+        for (i = 0; i < y.length; i++) {
+            if (y[i].value === "") {
+                y[i].classList.add("invalid");
+                valid = false;
+            }
+        }
+        if (currentTab === 1) {
+            localStorage.setItem('afterSubmit', "true")
+        }
+        return valid;
+    }
+</script>
+
+</body>
+</html>

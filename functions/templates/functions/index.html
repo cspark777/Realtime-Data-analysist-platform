@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+    <span id="toast-message" style="display: none;">{{ status }}</span>
+    <span id="toast-error" style="display: none;">
+              {% if status == '409' %}
+                  Streamprocessor Already Stopped
+              {% else %}
+                  {% for text in message %}
+                      {{ text }}
+                  {% endfor %}
+              {% endif %}
+    </span>
+
+    <h2 class="project-name">{{ current_project }}</h2>
+    <h2 class="dashboard__header">Manage Functions</h2>
+ 
+
+    {% if functions %}
+        <div class="dashboard">
+            <div class="dashboard__cards wrapper" id="stream_processors">
+                {% for function in functions %}
+                    <div class="card">
+                        <h2 class="card__header">
+                            {{ function.name }}
+                        </h2>
+                        <div class="card__body">
+                            <span class="card__field" data-header="Container">
+                              {{ function.docker_image }}
+                            </span>
+                            <div class="grid grid-columns--2">
+                                <span class="card__field" data-header="Requested Replicas" id="expected_replicas">
+                                    {{ streamprocessor.replicas }}
+                                </span>
+                                <span class="card__field" data-header="Actual Replicas" id="running_replicas">
+                                    <div id="DATA_dagrunner_{{ streamprocessor.id }}_{{ current_project.id }}"></div>
+                                </span>
+                            </div>
+                            <div>
+                                {% if streamprocessor.is_running %}
+                                    <span class="card__field card__field--green" data-header="Status"
+                                          id="status_replicas">Healthy</span>
+                                {% else %}
+                                    <span class="card__field card__field--cyan" data-header="Status"
+                                          id="status_replicas">Not Deployed</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="card__footer">
+                            <a class="card-action edit" href="{% url 'projects:functions:edit' project_id=current_project.id function_id=function.id%}">
+                                <span class="helper">Edit</span></a>
+                            <a class="card-action duplicate"
+                               href="{% url 'projects:functions:duplicate' project_id=current_project.id function_id=function.id %}">
+                                <span class="helper">Duplicate</span></a>
+                            <a class="card-action deploy"
+                               data-project-id="{{ current_project.id }}"
+                               data-streamprocessor-id="{{ streamprocessor.id }}"
+                               href="{% url 'projects:functions:run' project_id=current_project.id function_id=function.id %}">
+                                <span class="helper">Deploy</span></a>
+                            <a class="card-action pause"
+                               href="{% url 'projects:functions:stop' project_id=current_project.id function_id=function.id %}">
+                                <span class="helper">Stop</span></a>
+                            <!-- <a class="card-action view-logs"
+                               href="{% url 'projects:functions:view_logs' project_id=current_project.id function_id=function.id %}">
+                                <span class="helper">Logs</span></a>
+                            <a class="card-action monitor"
+                               href="#">
+                                <span class="helper">Monitor</span></a> -->
+                            <a class="card-action delete" id="delete_stream_processor"
+                               href="{% url 'projects:functions:delete' project_id=current_project.id function_id=function.id %}">
+                                <span class="helper">Delete</span></a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <div class="empty">
+            <span class="empty__text">No functions are available.</span>
+            <img src="{% static 'design/images/empty-streamprocessor.svg' %}"
+                 width="155" height="134" alt="no data" class="empty__image">
+        </div>
+    {% endif %}
+    <div class="dashboard__footer">
+        <a class="btn" href="{% url 'projects:functions:new' project_id=current_project.id %}">
+            Add Function
+        </a>
+    </div>
+    <script type="text/javascript">
+        var ws = new WebSocket("ws://{{ websocket_server }}/");
+        ws.onmessage = function (event) {
+            var data = event.data;
+            JSON.parse(data, function (k, v) {
+                $('#' + `${k}`).text(v)
+            });
+            checkStatusStreamProcessors()
+        };
+        $('.deploy').on('click', function () {
+            var data = {
+                streamprocessorId: $(this).data('streamprocessor-id'),
+                projectId: $(this).data('project-id')
+            };
+            ws.send(JSON.stringify(data))
+        });
+
+        var timeOut = 5000, hideDuration = 1000, showDuration = 300, extendedTimeOut = 1000;
+        var delay = timeOut + hideDuration + showDuration;
+
+        jQuery(document).ready(function ($) {
+            function setNotification(status) {
+
+                var errorMessage = $('#toast-error').text();
+
+                var opts = {
+                    "closeButton": true,
+                    "debug": false,
+                    "positionClass": "toast-top-right",
+                    "onclick": null,
+                    "showDuration": showDuration,
+                    "hideDuration": hideDuration,
+                    "timeOut": timeOut,
+                    "extendedTimeOut": extendedTimeOut,
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                };
+
+                if (status.startsWith('2')) {
+                    toastr.success("The Stream Processor has been succesfully deployed.", "Message", opts);
+                } else {
+                    toastr.error(errorMessage, "Message", opts);
+                }
+            }
+
+        
+
+            var status = $('#toast-message').text();
+            console.log("Toast Message Status is: " + status)
+            if (status && $.isNumeric(status)) {
+                setNotification(status);
+            
+            }
+        });
+
+        function checkStatusStreamProcessors() {
+            var stream_processors = $('#stream_processors div.card');
+
+            stream_processors.each(function () {
+                var expected = $(this).find('#expected_replicas'),
+                    actual = $(this).find('#running_replicas'),
+                    status = $(this).find('#status_replicas'),
+                    deleteButton = $(this).find('#delete_stream_processor');
+
+                var actual_int = parseInt(actual.text().trim());
+                var expected_int = parseInt(expected.text().trim());
+
+                if (isNaN(actual_int)) {
+                    status.text('Stopped')
+                        .removeClass('card__field--cyan')
+                        .removeClass('card__field--green')
+                } else if (actual_int !== expected_int) {
+                    status.text('Error')
+                        .removeClass('card__field--cyan')
+                        .removeClass('card__field--green')
+                        .addClass('card__field--red')
+                } else if (actual_int === expected_int) {
+                    deleteButton.css('pointer-events', 'none')
+                }
+            })
+        }
+    </script>
+
+{% endblock %}

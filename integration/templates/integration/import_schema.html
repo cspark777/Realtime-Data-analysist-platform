@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    {% csrf_token %}
+
+    <div class="container">
+        <img class="logo-image" src="{% static 'design/images/load-data-step-3.svg' %}" width="100" height="30"
+             alt="current step">
+        <h2 class="titleWizard">Import Data</h2>
+        <span class="textSelect">
+                Preview Files
+            </span>
+    </div>
+
+    <form id="selectData" autocomplete="off" method="post">
+        <div class="styled-select"
+             style=" margin-bottom:30px;margin-top: 30px; display: flex; flex-direction: column;align-items: flex-start;width: 50%;">
+            <select name="create_definition" onchange="changeValueDefinition(value)"
+                    style="margin-bottom: 30px"
+                    name="create_definition" class="step">
+                <option value="yes">
+                    Use New Event Definition
+                </option>
+                <option value="no">
+                    Use Existing Event Definition
+                </option>
+            </select>
+            <div style="width:100%" id="selectSchema">
+                <input style="color:#444444" placeholder="New Event Name"
+                       name="new_schema_name"/>
+            </div>
+        </div>
+        <div class="new-item new-item--simulation wrapper">
+            <div id="invalid_form" hidden></div>
+            <div class="new-item__title">
+                {% for field in form %}
+                    {# {{ field.label }}#}
+                    {{ field }}
+                    {% if field.help_text %}
+                        <span class="card__field">{{ field.help_text }}</span>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <span class="card__field card__field--red" data-header="Status">{{ error }}</span>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+
+            <div class="new-item__body" id="schema-table">
+
+                <table class="new-item__step" id="fields-table">
+                    <tr>
+                        <th><b>Imported File Schema Field</b></th>
+                        <th id="title_description"><b>Description</b></th>
+                        <th><b>Destination Schema Field</b></th>
+                        <th id="title_required"><b>Required</b></th>
+                        <th id="title_action"><b>Actions</b></th>
+                    </tr>
+                    {% for field in table_headers %}
+                        <tr id="row_{{ field }}">
+                            <td>
+                                <input name="name_{{ field }}" value="{{ field }}" class="required"/>
+                            </td>
+                            <td id="description_{{ field }}">
+                                <input name="description_{{ field }}" value=""/>
+                            </td>
+                            <td id="typeDefinition_{{ field }}">
+                                <div class="styled-select">
+                                    <select name="type_field_{{ field }}">
+                                        {% for type_field in field_types %}
+                                            <option value="{{ type_field.0 }}">
+                                                {{ type_field.1 }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </td>
+
+                            <td id="checkBox_{{ field }}"
+                                style="display: flex;justify-content: center;align-items: center; width:30px; height:30px;">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" name="required_{{ field }}" value="True" checked>
+                                    <span class="checkmark"></span>
+                                </label>
+                            </td>
+                            <td id="btnDelete_{{ field }}">
+                                <a href="" class="card-btn card-btn--delete">Delete</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+
+
+            </div>
+            {% csrf_token %}
+            <div class="new-item__body" id="schema-table"></div>
+            <div id="btnNewField" class="new-item__body">
+                <div class="btn btn--step" id="add-field">New field</div>
+            </div>
+
+            <div onclick="nextStep(this)" id="btnConform" class="new-item__footer">
+                <div class="blockImportData">
+                    <div id="buttonImportData" class="btn">
+                        <span style="">Confirm</span>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </form>
+
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        const HEADERS = {'X-CSRFToken': $("input[name='csrfmiddlewaretoken']").val()};
+        const table_headers = {{ table_headers | safe }};
+        const schemas = {{ schemas | safe }};
+        const fieldTypes = {{ field_types | safe }};
+
+        let typeDefinition = 1;
+        let arrFields = schemas[0].fields;
+        let option;
+
+        function changeEventName(name) {
+            const filteredArrayFields = schemas.filter((schema) => schema.name === name)
+            arrFields = filteredArrayFields[0].fields
+            option = arrFields.map((field) => `<option value="${field.name}">${field.name}</option>`)
+            table_headers.forEach((item) => {
+                if (document.getElementById(`typeDefinition_${item}`) !== null) {
+                    document.getElementById(`typeDefinition_${item}`).innerHTML = `<td id="typeDefinition_${item}">
+                                                                                    <div class="styled-select">
+                                                                                        <select name="type_field_${item}">
+                                                                                            ${option}
+                                                                                        </select>
+                                                                                    </div>
+                                                                                </td>`;
+                }
+
+            })
+
+        }
+
+        function changeValueDefinition(definitionName) {
+            option = arrFields.map((field) => `<option value="${field.name}">${field.name}</option>`)
+            if (definitionName === 'no') {
+                typeDefinition = 0
+                table_headers.forEach((item) => {
+                    if (document.getElementById(`typeDefinition_${item}`) !== null) {
+                        document.getElementById(`typeDefinition_${item}`).innerHTML = `<td id="typeDefinition_${item}">
+                                                                                    <div class="styled-select">
+                                                                                        <select name="type_field_${item}">
+                                                                                            ${option}
+                                                                                        </select>
+                                                                                    </div>
+                                                                                </td>`;
+                    }
+                    if (document.getElementById(`checkBox_${item}`) !== null) {
+                        document.getElementById(`checkBox_${item}`).innerHTML = `<div style="display:none"></div>`;
+                    }
+                    if (document.getElementById(`btnNewField`) !== null) {
+                        document.getElementById(`btnNewField`).innerHTML = `<div style="display:none"></div>`;
+                    }
+                    if (document.getElementById(`description_${item}`)) {
+                        document.getElementById(`description_${item}`).innerHTML = `<div style="display:none"></div>`;
+
+                    }
+                    if (document.getElementById(`title_description`) !== null) {
+                        document.getElementById(`title_description`).innerHTML = `<div style="display:none"></div>`;
+                    }
+                    if (document.getElementById(`title_required`) !== null) {
+                        document.getElementById(`title_required`).innerHTML = `<div style="display:none"></div>`;
+                    }
+                    if (document.getElementById(`title_action`) !== null) {
+                        document.getElementById(`title_action`).innerHTML = `<div style="display:none"></div>`;
+                    }
+
+                    if (document.getElementById(`selectSchema`) !== null) {
+                        document.getElementById(`selectSchema`).innerHTML =
+                            `<div class="styled-select">
+                        <select onchange="changeEventName(value)" name="schema_type" class="class="step"">
+                            {% for schema in schemas %}
+                                <option value="{{schema.name}}">
+                                    {{ schema.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        </div>`;
+                    }
+                })
+            } else {
+                typeDefinition = 1
+                table_headers.forEach((item) => {
+                    document.getElementById(`selectSchema`).innerHTML = ` <input placeholder="New Event Name" />`;
+                    document.getElementById(`btnNewField`).innerHTML = `<div id="btnNewField" class="new-item__body">
+                                                                           <div class="btn btn--step" id="add-field">New field</div>
+                                                                         </div>`;
+
+                    document.getElementById(`title_description`).innerHTML = ` <th id="title_description"><b>Description</b></th>`;
+                    document.getElementById(`title_required`).innerHTML = `  <th id="title_required"><b>Required</b></th>`;
+                    document.getElementById(`title_action`).innerHTML = ` <th id="title_action"><b>Actions</b></th>`;
+                    if (document.getElementById(`description_${item}`) !== null) {
+                        document.getElementById(`description_${item}`).innerHTML = ` <td id="description_${item}">
+                                                                                    <input name="description_${item}" value=""/>
+                                                                                 </td>`;
+                    }
+
+
+                    if (document.getElementById(`checkBox_${item}`) !== null) {
+                        document.getElementById(`checkBox_${item}`).innerHTML = `<td id="checkBox_${item}">
+                                                                                 <label class="checkbox-container">
+                                                                                        <input type="checkbox" name="required_${item}" value="True" checked>
+                                                                                         <span class="checkmark"></span>
+                                                                                 </label>
+                                                                             </td>`;
+                    }
+                    if (document.getElementById(`typeDefinition_${item}`) !== null) {
+                        document.getElementById(`typeDefinition_${item}`).innerHTML = ` <td id="typeDefinition_${item}">
+                                                                                    <div class="styled-select">
+                                                                                        <select name="type_field_${item}" class="step">
+
+                        {% for type_field in field_types %}
+                                                                                                <option value="{{ type_field.0 }}">{{ type_field.1 }}</option>
+                                                                                            {% endfor %}
+                                                                                        </select>
+                                                                                    </div>
+                                                                                </td>`;
+                    }
+
+                })
+            }
+        }
+
+        function nextStep(e) {
+            var formData = new FormData(document.forms[0])
+
+            var obj = Object.fromEntries(
+                Array.from(formData.keys()).map(key => [
+                    key, formData.getAll(key).length > 1
+                        ? formData.getAll(key)
+                        : formData.get(key)
+                ])
+            )
+            $.ajax({
+                url: '{% url 'projects:integration:data_schema_validation' project_id=current_project.id %}',
+                type: "POST",
+                dataType: "json",
+                contentType: "application/json",
+                headers: HEADERS,
+                data: JSON.stringify(obj),
+                success: function (response) {
+                    window.location.href = `{% url 'projects:integration:data_stream_import' project_id=current_project.id %}?schema=${response.schema}`;
+                },
+                error: function (response) {
+                    alert('Error...')
+                },
+            })
+        }
+
+    </script>
+    <script src="{% static 'integration/js/wizardDefinition.js' %}"></script>
+{% endblock %}

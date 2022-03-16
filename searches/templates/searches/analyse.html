@@ -1,0 +1,54 @@
+<div id="analyseCard" class="arrow-connected" {% if hidden %}style="display: none"{% endif %}>
+    <div class="card-large" data-collapsed="0">
+        <h2 class="card-large__header">Analyse field</h2>
+        <div class="card-large__description">
+            <div class="analysis-param" id="analysisTypeParam">
+                <span>Analysis type:</span>
+                <div class="styled-select">
+                    <select id="analyseTypeSelect">
+                        <option value="histogram">Histogram</option>
+                        <option value="series">Time Series</option>
+                        <option value="forecast">Forecasting</option>
+                        <option value="mapping">Mapping</option>
+                    </select>
+                </div>
+            </div>
+            <div class="analysis-param" id="fieldToAnalyseParam">
+                <span>Field to analyse:</span>
+                <div class="styled-select">
+                    <select id="analyseFieldSelect"></select>
+                </div>
+            </div>
+            <div class="analysis-param" id="rowCountParam">
+                <span>Row count:</span>
+                <div class="styled-select">
+                    <select id="analyseRowCountSelect">
+                        <option value="10">10</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+            </div>
+            <div class="analysis-param" id="granularityParam" style="display: none">
+                <span>Bucket:</span>
+                <div class="styled-select">
+                    <select id="granularitySelect">
+                        <option value="0">Millisecond</option>
+                        <option value="1" selected>Second</option>
+                        <option value="60">Minute</option>
+                        <option value="3600">Hour</option>
+                        <option value="86400">Day</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div id="analyseCardBody" class="card-large__body">
+            <div class="card-large__body">
+                <div style="display: flex">
+                    <div id="analyseChartContainer"></div>
+                    <div id="analyseStats"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

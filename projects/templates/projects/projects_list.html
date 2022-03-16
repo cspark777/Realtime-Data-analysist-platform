@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    {% if projects %}
+        <h2 class="project-card__header">Your Projects</h2>
+        <div class="project-card__wrapper">
+            {% for project in projects %}
+                <div class="project-card">
+                    <div class="project-card__top">
+                        <div class="project-card__user">
+                            <div>
+                                <img src="{% static 'design/images/submenu/menu_avatar.svg' %}" alt="">
+                            </div>
+                            <div>
+                                <a href="{% url 'projects:projects_details' project_id=project.id %}">
+                                    <h3>{{ project.name }}</h3></a>
+                                <span>{{ project.created_by }}</span>
+                            </div>
+                        </div>
+                        <div class="project-card__processors">
+                            <span>Running Stream Processors</span>
+                            {% with project.streamprocessor_set.count as streamprocessor_count %}
+                                <span class="card__field {% if streamprocessor_count > 0 %}card__field--green{% endif %}">
+                                {{ streamprocessor_count }}<i></i></span>
+                            {% endwith %}
+                        </div>
+                    </div>
+                    <div class="project-card__btns">
+                        <a class="card-action edit"
+                           href="{% url 'projects:edit_project' project_id=project.id %}">
+                            <span class="helper">Edit</span>
+                        </a>
+                        <a class="card-action duplicate"
+                           href="{% url 'projects:duplicate_project' project_id=project.id %}">
+                            <span class="helper">Duplicate</span>
+                        </a>
+                        <a class="card-action delete"
+                           href="{% url 'projects:delete_project' project_id=project.id %}">
+                            <span class="helper">Delete</span>
+                        </a>
+                        <a class="card-btn card-btn--show"
+                           href="{% url 'projects:projects_details' project_id=project.id %}">
+                            View Project</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="project-card__footer">
+            <a class="btn btn--step" id="import-project">
+                Import Project
+            </a>
+            <a class="btn" href="{% url 'projects:new_project' %}">
+                Create a New Project
+            </a>
+        </div>
+    {% else %}
+        <div class="information">
+            <h2 class="information__header">Welcome To DATA</h2>
+            <p>DATA is a powerful platform for processing streams of complex business events. By
+                identifying negative and positive situations, you will be able to improve customer
+                experience and optimise your internal business processes.</p>
+            <p>Using this interface, you will be able to define your data streams, define your stream
+                processors, and manage the deployment and execution of them</p>
+            <p>For more details, please visit the
+                <a href=http://DATA.systems/docs target="_blank">DATA Documentation</a></p>
+            <a class="btn" href="{% url 'projects:new_project' %}">Create Your First Project</a>
+        </div>
+    {% endif %}
+    {% csrf_token %}
+    <input type="file" class="hidden" hidden/>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        const HEADERS = {
+            'X-CSRFToken': $("input[name='csrfmiddlewaretoken']").val()
+        };
+
+        var inputFile = $('input[type=file]');
+        $('#import-project').click(function (e) {
+            inputFile.click();
+        });
+
+        inputFile.change(function () {
+            var data = new FormData;
+            data.append('file', this.files[0]);
+            jQuery.ajax({
+                url: '{% url 'projects:import_project' %}',
+                type: "POST",
+                headers: HEADERS,
+                data: data,
+                processData: false,
+                contentType: false,
+                success: function () {
+                    window.location = '{% url 'projects:projects_list' %}';
+                },
+                error: function () {
+                    alert('File is not correct!');
+                }
+            });
+        });
+    </script>
+{% endblock %}

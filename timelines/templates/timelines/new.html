@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load extras %}
+
+{% block content %}
+    <style>
+        .new-item__actions button:not(:nth-child(2)) {
+            margin-left: 5px;
+        }
+    </style>
+
+    <h2 class="project-name">{{ current_project }}</h2>
+    <h2 class="dashboard__header">New Timeline</h2>
+
+    <form autocomplete="off" method="post">
+        {% csrf_token %}
+        <div class="new-item__title" id="timeline-table">
+            <div id="invalid_form" hidden></div>
+            {% for field in form %}
+                {{ field }}
+                {% if field.help_text %}
+                    <small class="text-primary">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <p class="alert alert-danger">{{ error }}</p>
+                {% endfor %}
+            {% endfor %}
+        </div>
+        {% if form.errors.exception %}
+            <p class="alert alert-danger">{{ form.errors.exception }}</p>
+        {% endif %}
+
+        <div class="new-item__body">
+            <div id="add-item-button-group" style="text-align: right; margin-top: 40px">
+                <button class="btn btn--step" id="add-timeline-items">New Timeline Items</button>
+            </div>
+        </div>
+
+        <div class="new-item__footer">
+            <button class="btn" type="submit" id="submit">Submit</button>
+        </div>
+    </form>
+  </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        var STREAMS = {{ streams | safe }};
+        var SCHEMA_FIELDS = {{ schema_fields|safe }};
+    </script>
+    <script src="{% static 'timelines/js/edit.js' %}"></script>
+    <script src="{% static 'timelines/js/loading.js' %}"></script>
+    <script>
+
+        const HEADERS = {
+            'X-CSRFToken': $("input[name='csrfmiddlewaretoken']").val()
+        };
+        submitButton.click(function (e) {
+            e.preventDefault();
+            var data = new FormData;
+            var inputs = $('input, select, textarea');
+
+            inputs.each(function () {
+                var value = $(this).val(),
+                    name = $(this).attr('name');
+                if ($(this).attr('type') === 'file') {
+                    data.append(name, this.files[0])
+                } else {
+                    data.append(name, value);
+                }
+            });
+            jQuery.ajax({
+                url: '{% url 'projects:timelines:new' project_id=current_project.id %}',
+                type: "POST",
+                headers: HEADERS,
+                data: data,
+                processData: false,
+                contentType: false,
+                success: function () {
+                    console.log();
+                    window.location = '{% url 'projects:timelines:index' project_id=current_project.id %}';
+                },
+            });
+        });
+    </script>
+{% endblock %}
+

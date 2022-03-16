@@ -1,0 +1,28 @@
+{% extends "streams/logs.html" %}
+
+{% block analyse %}
+<div class="arrow-connected">
+  <div class="card-large" data-collapsed="0" id="events_over_time_card" style="margin-bottom: 0">
+    <h2 class="card-large__header">Events Over Time</h2>
+    <div class="card-large__body">
+      {% include 'reports/events_over_time_report.html' %}
+    </div>
+  </div>
+</div>
+
+<div class="arrow-connected">
+  <div class="card-large" data-collapsed="0" id="events_over_time_cumulative_card">
+    <h2 class="card-large__header">Events Over Time - Cumulative</h2>
+    <div class="card-large__body">
+      {% include 'reports/events_over_time_report_cumulative.html' %}
+    </div>
+  </div>
+</div>
+
+  <!-- <div class="card-large" data-collapsed="0" id="summary_card">
+    <h2 class="card-large__header">Summary Report</h2>
+    <div class="card-large__body">
+      {% include 'reports/summary_report.html' %}
+    </div>
+  </div> -->
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load extras %}
+{% load static %}
+{% block content %}
+
+    <div class="container">
+        <img class="logo-image" src="{% static 'design/images/load-data-step-2.svg' %}" width="100" height="30"
+             alt="current step">
+        <h2 class="titleWizard">Import Data</h2>
+        <span class="textSelect">
+           Preview Files
+        </span>
+        <div style="width: 100%; padding-top: 100px">
+            <h2 class="card-large__header">
+                Source Data
+            </h2>
+            {#            <div id="topItems" class="top_table"></div>#}
+            {##}
+            <table id="table_data" class="display" style="width:100%">
+                <thead>
+                <tr>
+                    {% for key in table_headers %}
+                        <th>{{ key }}</th>
+                    {% endfor %}
+                </tr>
+                </thead>
+            </table>
+
+        </div>
+        <div style="margin-top:40px" onClick="confirmMethod()" id="buttonImportData" class="btn">
+            <span style="">Confirm</span>
+        </div>
+
+    </div>
+
+
+    </div>
+    <script type="text/javascript">
+        function confirmMethod() {
+            window.location.href = '{% url 'projects:integration:data_schema_import' project_id=current_project.id%}';
+        }
+
+        $(document).ready(function () {
+            const tableData = {{table_data | safe}};
+            const categoryNameData ={{ table_headers | safe}}
+            const monitorSourceDataTable = $('#table_data');
+
+            const columns = categoryNameData.map(key => {
+                return {'data': key}
+            });
+            monitorSourceDataTable.DataTable({
+
+                "data": tableData,
+                "columns": columns,
+                "order": [[0, 'desc']]
+            });
+        });
+    </script>
+
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+ 
+{% block content %}
+
+<h1>Testing & Simulation</h1>
+
+<div class="container-fluid">
+    
+    <form autocomplete="off" method="POST">
+            {% csrf_token %}
+
+    
+        {{form.as_table}}
+ 
+        <input type="submit">
+    </form>
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+{% endblock %}

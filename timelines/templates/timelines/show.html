@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+  {% load humanize %}
+  <div class="row">
+    {#  form#}
+    <div class="col-md-4">
+      <h4 class="new-item__header">Timeline of {{ timeline_obj.name }}</h4>
+      {% if unique_key_value %}
+        <form autocomplete="off" class="timeline__form" method="POST" action=".">
+          {% csrf_token %}
+          {% for each  in unique_key_value %}
+            <p>
+              <input class="form-control" maxlength="100" type="text" id="{{ each.id }}_id" value="{{ each.value }}"
+                     name="{{ each.id }}_field" placeholder="{{ each.id }}"/>
+            </p>
+          {% endfor %}
+          <button class="btn" type="submit">Submit</button>
+        </form>
+        </div>
+        {# end form #}
+        <div class="timeline">
+        {% if show_data %}
+          <div class="timeline__item timeline__item--inactive">
+            <div class="timeline__timeago"></div>
+            <div class="timeline__icon-wrapper"><span class="timeline__icon">
+          <img
+              src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAAVCAYAAACkCdXRAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAADdSURBVHgBrZNbEYMwEEVvUICE1AESKgUHrQNwgATqoBKKg+KAOAAH290kP83wWB5n5k4+SA6w2TVYgYhyXkqOrI7TGWMc9sKiB81T7RVVtM5TK7KkI0/PZjO+O3SUGpmFDtWXTdDhNndILZQ1s9DAG+sNUY09rAgX28JsCC3C7coqtXzxBExqWewfOZzzwW7meYFwk/2iOBa+SX5p4Hw4LefNGZPnLaXNS6HrBzrG908Y33CGxtcsWkecQ2p3kwkocB5/aRmuI79S5ge9h364l3AS37QUOr3EcWQy3A+5sbGhCyNNkQAAAABJRU5ErkJggg==">
+        </span></div>
+            <div class="timeline__body">
+              <h2 class="timeline__title">No Activity</h2>
+            </div>
+          </div>
+        {% endif %}
+        {% for each in show_data %}
+          <div class="timeline__item">
+            <div class="timeline__timeago"><span>{{ each.date_time|time }}</span>
+              <span>{{ each.date_time|naturaltime }}</span></div>
+            <div class="timeline__icon-wrapper"><span class="timeline__icon"><img
+                src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAAVCAYAAACkCdXRAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAADdSURBVHgBrZNbEYMwEEVvUICE1AESKgUHrQNwgATqoBKKg+KAOAAH290kP83wWB5n5k4+SA6w2TVYgYhyXkqOrI7TGWMc9sKiB81T7RVVtM5TK7KkI0/PZjO+O3SUGpmFDtWXTdDhNndILZQ1s9DAG+sNUY09rAgX28JsCC3C7coqtXzxBExqWewfOZzzwW7meYFwk/2iOBa+SX5p4Hw4LefNGZPnLaXNS6HrBzrG908Y33CGxtcsWkecQ2p3kwkocB5/aRmuI79S5ge9h364l3AS37QUOr3EcWQy3A+5sbGhCyNNkQAAAABJRU5ErkJggg=="></span>
+            </div>
+            <div class="timeline__body">
+              <h2 class="timeline__title">{{ each.title }}</h2>
+              <span class="timeline__description">{{ each.desc }}</span>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="alert alert-danger"><strong>No</strong> events found.</div>
+      {% endif %}
+      </div>
+  </div>
+{% endblock %}
+{% load static %}
+{% block extra_styles %}
+  <link rel="stylesheet" href="{% static 'timelines/css/component.css' %}">
+{% endblock %}

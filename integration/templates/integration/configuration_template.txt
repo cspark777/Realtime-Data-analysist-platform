@@ -1,0 +1,52 @@
+{% for each in source %}<source>
+@type tail
+path /fluentd/data/
+pos_file /tmp/td-agent/
+tag {{each.name}}
+format none
+<parse>
+@type csv
+keys
+</parse>
+</source>
+
+<filter {{each.name}}>
+@type record_transformer
+enable_ruby
+<record>
+hostname "#{Socket.gethostname}"
+uuid ${ require 'securerandom'; SecureRandom.uuid ; }
+
+#uuid ${SecureRandom.uuid}
+</record>
+</filter>
+
+<match {{each.name}}>
+@type kafka2
+
+# list of seed brokers
+brokers ##JAYAPAL_KAFKA_URL_PUBLIC Environment Variable GOES HERE##
+use_event_time true
+
+# buffer settings
+<buffer bureau>
+@type file
+path /tmp
+flush_interval 0.2s
+</buffer>
+
+# data type settings
+<format>
+@type json
+</format>
+
+# topic settings
+topic_key bureau
+
+default_topic {{each.name}}
+
+# producer settings
+required_acks -1
+compression_codec gzip
+</match>
+{% endfor %}

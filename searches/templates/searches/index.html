@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+  <style>
+    th:last-child { width: 17% }
+  </style>
+  <div class="row">
+    <div class="col-md-12">
+      <h2 class="project-name">{{ current_project }}</h2>
+      <h2 class="dashboard__header">Manage Searches</h2>
+
+      {% if searches %}
+        <table class="table-styled" id="table-1">
+          <tbody>
+          <tr>
+            <th>Search Name</th>
+            <th>Search Description</th>
+            <th>Actions</th>
+          </tr>
+
+          {% for search in searches %}
+            <tr>
+              <td>{{ search.name }}</td>
+              <td>{{ search.description }}</td>
+              <td>
+                <a href="{% url 'projects:searches:edit' project_id=current_project.id search_id=search.id %}"
+                   class="card-action edit">
+                   <span class="helper">Edit</span>
+                </a>
+
+                <a href="{% url 'projects:searches:duplicate' project_id=current_project.id search_id=search.id %}"
+                   class="card-action duplicate">
+                   <span class="helper">Duplicate</span>
+                </a>
+
+                <a
+                        href="{% url 'projects:searches:show' project_id=current_project.id search_id=search.id %}"
+                class="card-action monitor">
+                <span class="helper">Show</span>
+                </a>
+
+                <a href="{% url 'projects:searches:delete' project_id=current_project.id search_id=search.id %}"
+                   class="card-action delete">
+                   <span class="helper">Delete</span>
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <div class="empty">
+            <span class="empty__text">No searches are available.
+<!--            {% if not can_create %}-->
+<!--                <br/><strong>Please create a <a href="{% url 'projects:streams:new' project_id=current_project.id %}">stream</a> before working with searches</strong>-->
+<!--            {% endif %}-->
+            </span>
+            <img src="{% static 'design/images/empty-reports.svg' %}"
+                 width="155" height="134" alt="no data" class="empty__image">
+        </div>
+      {% endif %}
+
+
+      {% if is_paginated %}
+        <div>
+          <span>
+              {% if page_obj.has_previous %}
+                <a class="btn btn-default" href="?page=1">&laquo; First</a>
+                <a class="btn btn-default" href="?page={{ previous_page_number }}">Previous</a>
+              {% endif %}
+
+              <span class="btn btn-default" style="opacity: 1; pointer-events: none;">
+                  Page {{ page_obj.number }} of {{ paginator.num_pages }}.
+              </span>
+
+            {% if page_obj.has_next %}
+              <a class="btn btn-default" href="?page={{ page_obj.next_page_number }}">Next</a>
+              <a class="btn btn-default" href="?page={{ paginator.num_pages }}">Last &raquo;</a>
+            {% endif %}
+          </span>
+        </div>
+      {% endif %}
+      <div class="dashboard__footer" style="border: none">
+        {% if can_create %}
+            <a href="{% url 'projects:searches:create' project_id=current_project.id %}" class="btn">Add Search</a>
+        {% else %}
+            <div class="btn disabled" disabled>Add Search</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

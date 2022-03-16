@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<h2 class="project-name">{{ current_project }}</h2>
+<h2 class="dashboard__header">New Data Source</h2>
+    <div class="new-item new-item--simulation wrapper">
+        <form autocomplete="off" method="post">
+            {% csrf_token %}
+            {% if form.errors.exception %}
+                <span class="card__field card__field--red" data-header="Status">{{ form.errors.exception }}</span>
+            {% endif %}
+            <div id="invalid_form" hidden></div>
+            <div class="new-item__title">
+                {% for field in form %}
+                    {% if field.name == 'source_type' %}
+                        <div class="styled-select new-item__event-type">{{ field }}</div>
+                    {% elif field.name == 'stream' %}
+                        <div class="styled-select new-item__run-type">{{ field }}</div>
+                    {% else %}
+                        {{ field }}
+                    {% endif %}
+                    {% if field.help_text %}
+                        <span class="card__field">{{ field.help_text }}</span>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <span class="card__field card__field--red" data-header="Status">{{ error }}</span>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+            <div class="new-item__footer">
+                <button class="btn" id="submit" type="submit">Submit</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        var fieldTypes = {{ field_types | safe }};
+    </script>
+{% endblock %}

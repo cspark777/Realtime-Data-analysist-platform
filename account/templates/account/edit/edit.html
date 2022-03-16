@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="information">
+        <h2 class="information__header">Edit User Profile</h2>
+        <form autocomplete="off" method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                {# {{ field.label }}#}
+                {{ field }}
+                <br><br>
+                {% if field.help_text %}
+                    <span class="card__field">{{ field.help_text }}</span>
+                {% endif %}
+                {% for error in field.errors %}
+                    <span class="card__field card__field--red">{{ error }}</span>
+                {% endfor %}
+            {% endfor %}
+
+            <div>
+                {% if request.user.organisation.invite_key %}
+                <input type="text" value="{{ request.get_host }}{% url 'account:organsiation_invite' invite_key=request.user.organisation.invite_key %}" >
+                {% else %}
+                <input type=text placeholder="Invite URL">
+                {% endif %}
+            </div>
+            <button class="btn" type="submit">Submit</button>
+        </form>
+    </div>
+{% endblock %}

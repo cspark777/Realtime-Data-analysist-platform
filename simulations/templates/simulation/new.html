@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+
+<h2 class="project-name">{{ current_project }}</h2>
+<h2 class="dashboard__header">New Simulation</h2>
+        <form autocomplete="off" method="post">
+            <div class="new-item new-item--simulation wrapper" id="simulation-table">
+                <div id="invalid_form" hidden>
+                </div>
+                <div class="new-item__title">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        {% if field.name == 'name' %}
+                            <div class="new-item__name">
+                                {{ field }}
+                            </div>
+                        {% elif field.name == 'description' %}
+                            <div class="new-item__description">
+                                {{ field }}
+                            </div>
+                            {% elif field.name == 'replicas' %}
+                            <div class="new-item__replicas">
+{#                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>#}
+                                {{ field }}
+                            </div>
+                        {% elif field.name == 'type_event' %}
+                            <div class="new-item__event-type">
+                                <div class="styled-select">
+                                    {{ field }}
+                                </div>
+                            </div>
+                        {% endif %}
+                        {% if field.help_text %}
+                            <span class="card__field">{{ field.help_text }}</span>
+                        {% endif %}
+                    {% endfor %}
+                    <div class="new-item__run-type">
+                        <!-- <label for="run_type">Run type</label> -->
+                        <div class="styled-select">
+                            <select name="run_type" id="run_type" onchange="runTypeChanged(this)">
+                                {% for option in run_type_choices %}
+                                    <option value="{{ option.0 }}">{{ option.1 }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="add-inputs run_type--additional" style="grid-area: 4/1/5/13">
+                    </div>
+                </div>
+
+                <div class="new-item__body">
+                  <style>
+                    th:nth-child(1) { width: 18% }
+                    th:nth-child(2) { width: 20% }
+                    th:nth-child(3) { width: 36% }
+                    th:nth-child(4) { width: 16% }
+                  </style>
+                </div>
+                <div style="display: flex; justify-content: flex-end">
+                    <button type="button" class="btn btn--step " id="add-step">Add new</button>
+                    <button type="button" class="btn btn--step" id="add-bulk-step">New Bulk Steps</button>
+                </div>
+                <div class="new-item__footer">
+                    <button class="btn" type="submit" id="submit" disabled>Submit</button>
+                </div>
+                <div class="deleted_steps"></div>
+
+            </div>
+        </form>
+        <div id="loading-div">Loading...</div>
+    
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        var TOPICS = {{ topics | safe }};
+        var DELAYTYPES = {{ delay_types | safe }};
+        var SCHEMA_FIELDS = {{ schema_fields|safe }};
+        var DEFINITION_TYPES = {{ definition_types|safe }};
+    </script>
+    <script src="{% static 'simulations/js/edit.js' %}"></script>
+    <script>
+        const HEADERS = {'X-CSRFToken': $("input[name='csrfmiddlewaretoken']").val()};
+
+        var $loading = $('#loading-div').hide();
+        var submitBtn = $('#submit');
+
+        submitButton.click(function (e) {
+            e.preventDefault();
+            var data = new FormData;
+            var inputs = $('main input, main select, main textarea');
+            console.log(inputs)
+            inputs.each(function () {
+                var value = $(this).val(),
+                    name = $(this).attr('name');
+                if ($(this).attr('type') === 'file') {
+                    data.append(name, this.files[0])
+                } else {
+                    data.append(name, value);
+                }
+            });
+            console.log(data);
+
+            jQuery.ajax({
+                url: '{% url 'projects:simulations:new_simulation' project_id=current_project.id %}',
+                type: "POST",
+                headers: HEADERS,
+                data: data,
+                processData: false,
+                contentType: false,
+                success: function () {
+                    window.location =  "/react" + '{% url 'projects:simulations:simulations_list' project_id=current_project.id %}';
+                },
+                beforeSend: function () {
+                    $loading.show();
+                    submitBtn.attr('disabled', true);
+                },
+                complete: function () {
+                    $loading.hide();
+                    submitBtn.attr('disabled', false);
+                },
+                error: function (response) {
+                    if (response.responseJSON && response.responseJSON.error) {
+                        $('#invalid_form').empty();
+                        $.each(response.responseJSON.error, function (key, value) {
+                            for (let j in value) {
+                                $('#invalid_form').append(`<span class="card__field card__field--red">${key.charAt(0).toUpperCase() + key.slice(1,)}: ${value[j]}</span>`);
+                            }
+                        });
+                        $('#invalid_form').show();
+                    } else {
+                        $('#invalid_form').empty();
+                        $('#invalid_form').hide();
+                    }
+                }
+            });
+
+        });
+
+    </script>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+  <div class="row">
+    <div class="col-md-12">
+      <h2 class="project-name">{{ current_project }}</h2>
+      <h2 class="dashboard__header">Manage Timelines</h2>
+      {% if timeline_list %}
+        <table class="table-styled table-styled--generic" id="table-1">
+          <tbody>
+          <tr>
+            <th>Timeline Name</th>
+            <th>Timeline Description</th>
+            <th>Actions</th>
+{#            <th>Status</th>#}
+          </tr>
+
+          {% for timeline in timeline_list %}
+            <tr>
+              <td>
+                  <a href="#">{{ timeline.name }}</a>
+
+              </td>
+              <td>{{ timeline.description }}</td>
+              <td>
+                <a href="{% url 'projects:timelines:edit_timeline' project_id=current_project.id timeline_id=timeline.id %}"
+                   class="card-action edit">
+                  <span class="helper">Edit</span>
+                </a>
+
+                <a href="{% url 'projects:timelines:show' project_id=current_project.id pk=timeline.id %}"
+                   class="card-action monitor">
+                  <span class="helper">Show</span>
+                </a>
+
+                <a href="{% url 'projects:timelines:delete' project_id=current_project.id timeline_id=timeline.id %}"
+                   class="card-action delete">
+                  <span class="helper">Delete</span>
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty">
+            <span class="empty__text">No timelines are available.</span>
+            <img src="{% static 'design/images/empty-timelines.svg' %}" width="120" height="134" alt="no data" class="empty__image">
+        </div>
+    {% endif %}
+
+      <div class="dashboard__footer">
+        <a href="{% url 'projects:timelines:new' project_id=current_project.id %}" class="btn">
+          Add Timeline
+        </a>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

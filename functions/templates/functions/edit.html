@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<h2 class="project-name">{{ current_project }}</h2>
+<h2 class="dashboard__header">Edit Function</h2>
+
+    <div class="new-item new-item--simulation wrapper">
+        <form autocomplete="off" method="post">
+            {% csrf_token %}
+            {% if form.errors.exception %}
+                <span class="card__field card__field--red" data-header="Status">{{ form.errors.exception }}</span>
+            {% endif %}
+            <div id="invalid_form" hidden></div>
+            <div class="new-item__title">
+                {% for field in form %}
+                    {# {{ field.label }}#}
+                    {{ field }}
+                    {% if field.help_text %}
+                        <span class="card__field">{{ field.help_text }}</span>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <span class="card__field card__field--red" data-header="Status">{{ error }}</span>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+  
+            <div class="new-item__body" id="function-table">
+                {% if fields.exists %}
+                    <table class="new-item__step" id="fields-table">
+                        <tr>
+                            <th>Endpoint URL</th>
+                            <th>Inbound Event Type</th>
+                            <th>Outbound Event Type</th>
+                            <th>Actions</th>
+                        </tr>
+                        {% for field in fields %}
+                            <tr>
+                                <td>
+                                    <input name="name_{{ field.id }}" value="{{ field.name }}" class="required"/>
+                                </td>
+                                <td><div class="styled-select">
+                                    <select name="inbound_schema_id_{{ field.id }}" class="">
+                                        {% for schema in schemas %}
+                                            <option value="{{ schema.0 }}" {% if field.inbound_schema_id == schema.0 %}selected{% endif %}>
+                                              {{ schema.1 }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    </div>
+                                </td>
+                                <td><div class="styled-select">
+                                    <select name="outbound_schema_id_{{ field.id }}" class="">
+                                        {% for schema in schemas %}
+                                            <option value="{{ schema.0 }}" {% if field.outbound_schema_id == schema.0 %}selected{% endif %}>
+                                              {{ schema.1 }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="" class="card-btn card-btn--delete">Delete</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endif %}
+            </div>
+            <div class="new-item__body">
+                <div class="btn btn--step" id="add-field">New Endpoint</div>
+            </div>
+            <div class="new-item__footer">
+                <button class="btn" id="submit" type="submit">Submit</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        var schemas = `
+            {% for schema in schemas %}
+                <option value="{{ schema.0 }}">{{ schema.1 }}</option>
+            {% endfor %}
+        `;
+    </script>
+    <script src="{% static 'functions/js/edit.js' %}"></script>
+{% endblock %}

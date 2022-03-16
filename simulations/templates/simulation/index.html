@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <h2 class="project-name">{{ current_project }}</h2>
+    <h2 class="dashboard__header">Manage Simulations</h2>
+
+    {% if exception %}
+        <div id="invalid_form">
+        <span class="card__field card__field--red">
+          {{ exception }}
+        </span>
+        </div>
+    {% endif %}
+    <span id="toast-message" style="display: none;">{{ status }}</span>
+    <span id="toast-error" style="display: none;">
+            {% if reason %}
+                Simulation {{ reason }}
+            {% else %}
+                {% for text in message %}
+                    {{ text }}
+                {% endfor %}
+            {% endif %}
+        </span>
+    <span id="status-runner" style="display: none;">{{ status_runner }}</span>
+    {% if simulations %}
+        <div class="dashboard">
+            <div class="dashboard__cards wrapper" id="simulations">
+                {% for simulation in simulations %}
+                    <div class="card">
+                        <h2 class="card__header">
+                            {{ simulation.name }}
+                        </h2>
+                        <div class="card__body">
+                            <div class="grid grid-columns--2">
+                                <span class="card__field"
+                                      data-header="Requested Replicas" id="expected_replicas">
+                                    {{ simulation.replicas }}
+                                </span>
+                                <span class="card__field" data-header="Actual Replicas" id="running_replicas">
+                                    <div id="DATA_dslrunner_{{ simulation.id }}_{{ current_project.id }}"></div>
+                                </span>
+                            </div>
+                            {% if simulation.is_running %}
+                                <span class="card__field card__field--green status-replicas" data-header="Status"
+                                      id="status_replicas">Completed - {{ simulation.completed }} Times</span>
+                            {% else %}
+                                <span class="card__field card__field--cyan status-replicas" data-header="Status"
+                                      id="status_replicas">Not Deployed</span>
+                            {% endif %}
+                        </div>
+                        <div class="card__footer">
+                            <a href="{% url 'projects:simulations:edit_simulation' project_id=current_project.id simulation_id=simulation.id %}">
+                                <button class="card-action edit"><span class="helper">Edit</span></button>
+                            </a>
+                            <a href="{% url 'projects:simulations:duplicate_simulation' project_id=current_project.id simulation_id=simulation.id %}">
+                                <button class="card-action duplicate"><span class="helper">Duplicate</span></button>
+                            </a>
+                            <a data-project-id="{{ current_project.id }}"
+                               data-simulation-id="{{ simulation.id }}"
+                               href="{% url 'projects:simulations:run_simulation' project_id=current_project.id simulation_id=simulation.id %}">
+                                <button class="card-action deploy"><span class="helper">Run</span></button>
+                            </a>
+                            <a href="{% url 'projects:simulations:stop_simulation' project_id=current_project.id simulation_id=simulation.id %}">
+                                <button class="card-action pause"><span class="helper">Stop</span></button>
+                            </a>
+                            <a id="delete_simulation"
+                               href="{% url 'projects:simulations:delete_simulation' project_id=current_project.id simulation_id=simulation.id %}">
+                                <button class="card-action delete"><span class="helper">Delete</span></button>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <div class="empty">
+            <span class="empty__text">No simulations are available.</span>
+            <img
+                    src="{% static 'design/images/empty-simulations.svg' %}"
+                    width="120"
+                    height="134"
+                    alt="no data"
+                    class="empty__image"
+            >
+        </div>
+    {% endif %}
+
+    {% if is_paginated %}
+        <div>
+          <span>
+              {% if page_obj.has_previous %}
+                  <a class="btn btn-default" href="?page=1">&laquo; First</a>
+                  <a class="btn btn-default" href="?page={{ previous_page_number }}">Previous</a>
+              {% endif %}
+
+              <span class="btn btn-default" style="opacity: 1; pointer-events: none;">
+                  Page {{ page_obj.number }} of {{ paginator.num_pages }}.
+              </span>
+
+              {% if page_obj.has_next %}
+                  <a class="btn btn-default" href="?page={{ page_obj.next_page_number }}">Next</a>
+                  <a class="btn btn-default" href="?page={{ paginator.num_pages }}">Last &raquo;</a>
+              {% endif %}
+          </span>
+        </div>
+    {% endif %}
+
+    <div class="dashboard__footer">
+        <a class="btn" href="{% url 'projects:simulations:new_simulation' project_id=current_project.id %}">
+            Add Simulation
+        </a>
+    </div>
+
+    <script>
+        var ws = new WebSocket("ws://{{ websocket_server }}/");
+
+        ws.onmessage = function (event) {
+            var data = event.data;
+            JSON.parse(data, function (k, v) {
+                $('#' + `${k}`).text(v)
+            });
+            checkStatusSimulations()
+        };
+        $('.deploy').on('click', function () {
+            var data = {
+                simulationId: $(this).data('simulation-id'),
+                projectId: $(this).data('project-id')
+            };
+            ws.send(JSON.stringify(data))
+        });
+
+        var timeOut = 5000, hideDuration = 1000, showDuration = 300, extendedTimeOut = 1000;
+        var delay = timeOut + hideDuration + showDuration;
+
+        jQuery(document).ready(function ($) {
+            function setNotification(status) {
+                var errorMessage = $('#toast-error').text();
+                var opts = {
+                    "closeButton": true,
+                    "debug": false,
+                    "positionClass": "toast-top-right",
+                    "onclick": null,
+                    "showDuration": showDuration,
+                    "hideDuration": hideDuration,
+                    "timeOut": timeOut,
+                    "extendedTimeOut": extendedTimeOut,
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                };
+                var statusRunner = $('#status-runner').text();
+
+                if (status.startsWith('2')) {
+                    toastr.success(`The Simulation has been succesfully ${statusRunner}.`, "Message", opts);
+                } else {
+                    toastr.error(errorMessage, "Message", opts);
+                }
+            }
+
+            var redirectUrl = {% if redirect_url %}'{{ redirect_url }}'{% else %}""{% endif %};
+
+            var status = $('#toast-message').text();
+            if (status && $.isNumeric(status)) {
+                setNotification(status);
+                setTimeout(function () {
+                    window.location = redirectUrl;
+                }, delay);
+            }
+        });
+
+        function checkStatusSimulations() {
+            var simulations = $('#simulations div.card');
+
+            simulations.each(function () {
+                var expected = $(this).find('#expected_replicas'),
+                    actual = $(this).find('#running_replicas'),
+                    status = $(this).find('#status_replicas'),
+                    deleteButton = $(this).find('#delete_simulation');
+
+                var actual_int = parseInt(actual.text().trim());
+                var expected_int = parseInt(expected.text().trim());
+
+                if (isNaN(actual_int)) {
+                    status.text('Stopped')
+                        .removeClass('card__field--cyan')
+                        .removeClass('card__field--green')
+                } else if (actual_int !== expected_int) {
+                    status.text('Error')
+                        .removeClass('card__field--cyan')
+                        .removeClass('card__field--green')
+                        .addClass('card__field--red')
+                } else if (actual_int === expected_int) {
+                    deleteButton.css('pointer-events', 'none')
+                }
+            });
+        }
+    </script>
+{% endblock %}

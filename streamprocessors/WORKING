@@ -1,0 +1,10 @@
+
+
+customer_satisfaction { customer_id : 444, customer_satisfaction : -20 }
+customer_satisfaction { customer_id : 444, customer_satisfaction : -20 }
+customer_satisfaction { customer_id : 444, customer_satisfaction : +10 }
+
+order_dispatch_performance { hub_id : 444, performance : -20 }
+order_dispatch_performance { hub_id : 499, performance : +3 }
+order_dispatch_performance { hub_id : 444, performance : +3 } 
+

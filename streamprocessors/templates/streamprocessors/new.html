@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+{% load static %}
+{% load extras %}
+{% block content %}
+
+  <style>
+    th:nth-child(1) {
+      width: 32%
+    }
+
+    th:nth-child(2) {
+      width: 48%
+    }
+
+    th:nth-child(3) {
+      width: 20%
+    }
+
+    .sub-selects {
+      border: 2px solid grey;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    .sub-selects > *:last-child {
+      margin-bottom: 0;
+    }
+  </style>
+  <style>
+
+  </style>
+
+  <h2 class="project-name">{{ current_project }}</h2>
+  <h2 class="dashboard__header">New Stream Processor</h2>
+
+  {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+  <form autocomplete="off" method="post">
+    <div id="invalid_form" hidden></div>
+    {% csrf_token %}
+    <div class="new-item__title">
+      {% for field in form %}
+        {% if field.label == 'Additional Integrity Checks' %}
+          &nbsp;
+          <!-- <input type="checkbox"
+                     name="additional_integrity_checks"
+                     id="id_additional_integrity_checks"
+                     data-toggle="popover"
+                     data-trigger="hover"
+                     data-placement="right"
+                     data-content="Performs additional integrity check at the expense of speed"
+                     data-original-title="Integrity checks"
+                     onchange="additionalIntegrityChanged(this)"
+                     {% if streamprocessor.additional_integrity_checks %}checked{% endif %}
+                     value="{{ streamprocessor.additional_integrity_checks }}"
+              /> -->
+        {% else %}
+          {{ field }}
+        {% endif %}
+        {% if field.help_text %}
+          <span class="card__field">{{ field.help_text }}</span>
+        {% endif %}
+        {% for error in field.errors %}
+          <span class="card__field card__field--red">{{ error }}</span>
+        {% endfor %}
+      {% endfor %}
+    </div>
+
+    <div class="new-item__body">
+      <table class="new-item__step" id="steps-table">
+        <tbody>
+        <tr>
+          <th>Step Name</th>
+          <th>Step Type</th>
+          <th>Actions</th>
+        </tr>
+        <tr>
+          <td><input name="name_new_0" value="Inbound Event" class="required"/></td>
+          <td>
+            <div class="styled-select"><select name="steptype_new_0" class="step" data-step_id="new_0"
+                                               onchange="stepTypeChanged(this)">
+              {% for step_type in step_types %}
+                {% if step_type.0 == 'inbound' or step_type.0 == 'inboundtimer' or step_type.0 == 'inboundttp' or step_type.0 == 'inboundkpi' %}
+                  <option value="{{ step_type.0 }}">{{ step_type.1 }}</option>
+                {% endif %}
+              {% endfor %}
+            </select></div>
+            <div class="add-selects" data-step_id="new_0">
+              {% for key, value in step_types_data.items %}
+                {% if key == 'inbound' %}
+                  {% for item in value.fields %}
+                    {% if item.input_type == "select" %}
+                      <div class="styled-select"><select name="{{ item.name }}_new_0"
+                                                         class="form-control step"
+                                                         data-step_id="new_0"
+                                                         data-popover-body="{{ item.popover.bottom_text }}"
+                                                         data-popover-title="{{ item.popover.top_text }}">
+                        {% if item.name == 'topic' %}
+                          <option value="0">Please Select...</option>
+                          {% for topic in topics %}
+                            <option value="{{ topic.name }}">
+                              {{ topic.display_name }}
+                            </option>
+                          {% endfor %}
+                        {% endif %}
+                        {% for option in item.choices %}
+                          <option value="{{ option.0 }}">{{ option.1 }}</option>
+                        {% endfor %}
+                      </select></div>
+                    {% endif %}
+                  {% endfor %}
+                {% endif %}
+              {% endfor %}
+            </div>
+          </td>
+          <td>
+            <input type="hidden" name="ordering_new_0" value="1" class="ordering_new"/>
+          </td>
+        </tr>
+
+        </tbody>
+      </table>
+      <div class="schema-additional-info">
+        <span class="schema-btn">Please Select...</span>
+        <div class="schema-popup hide">
+          <div class="schema-popup-wrapper">
+            <div class="schema-popup-content">
+              <table class="schema-table">
+                <thead>
+                <tr>
+                  <th>Field Name</th>
+                  <th>Type</th>
+                </tr>
+                </thead>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <table class="new-item__step" id="steps-table">
+        <tbody>
+        <tr>
+          <th>Step Name</th>
+          <th>Step Type</th>
+          <th>Actions</th>
+        </tr>
+        <tr>
+          <td><input name="name_new_1" value="Outbound Event" class="required"/></td>
+          <td>
+            <div class="styled-select"><select name="steptype_new_1" class="step" data-step_id="new_1"
+                                               onchange="stepTypeChanged(this)">
+              {% for step_type in step_types %}
+                {% if step_type.0 == 'outbound' or step_type.0 == 'outboundemail' or step_type.0 == 'outboundsms' or step_type.0 == 'outboundweb' %}
+                  <option value="{{ step_type.0 }}">{{ step_type.1 }}</option>
+                {% endif %}
+              {% endfor %}
+            </select></div>
+            <div class="add-selects" data-step_id="new_1">
+              {% for key, value in step_types_data.items %}
+                {% if key == 'outbound' %}
+                  {% for item in value.fields %}
+                    {% if item.input_type == "select" %}
+                      <div class="styled-select"><select name="{{ item.name }}_new_1"
+                                                         class="form-control step"
+                                                         data-step_id="new_1"
+                                                         data-popover-body="{{ item.popover.bottom_text }}"
+                                                         data-popover-title="{{ item.popover.top_text }}"
+                      >
+                        {% if item.name == 'topic' %}
+                          <option value="0">Please Select...</option>
+                          {% for topic in topics %}
+                            <option value="{{ topic.name }}">
+                              {{ topic.display_name }}
+                            </option>
+                          {% endfor %}
+                        {% endif %}
+                        {% for option in item.choices %}
+                          <option value="{{ option.0 }}">{{ option.1 }}</option>
+                        {% endfor %}
+                      </select></div>
+                    {% endif %}
+                  {% endfor %}
+                {% endif %}
+              {% endfor %}
+            </div>
+          </td>
+          <td>
+            <input type="hidden" name="ordering_new_1" value="2" class="ordering_new"/>
+            <button class="card-btn card-btn--delete js-delete">Delete</button>
+          </td>
+        </tr>
+
+        </tbody>
+      </table>
+      <div class="schema-additional-info" style="display: none">
+        <span class="schema-btn">Please Select...</span>
+        <div class="schema-popup hide">
+          <div class="schema-popup-wrapper">
+            <div class="schema-popup-content">
+              <table class="schema-table">
+                <thead>
+                <tr>
+                  <th>Field Name</th>
+                  <th>Type</th>
+                </tr>
+                </thead>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div style="text-align: right; margin-top: 40px">
+      <div id="add-item-button-group" >
+        <div class="btn btn--step" id="add-step">New step</div>
+      </div>
+      <button class="btn btn--step addNewStep"  data-toggle="modal" data-target="#newstepPopUp">Add New Step</button>
+    </div>
+ 
+    <div class="new-item__footer">
+      <button class="btn" type="submit" id="submit">Submit</button>
+    </div>
+    <div class="deleted_steps"></div>
+    <div class="deleted_blocks"></div>
+  </form>
+  <div class="modal fade newstepPopUp" id="newstepPopUp" tabindex="-1" role="dialog" aria-labelledby="newstepPopUp" style="display: none;" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        
+        <div class="modal-body">
+           <a  class="close" data-dismiss="modal" aria-label="Close">
+           &nbsp;
+          </a>
+          <h2>Add A New Step</h2>
+          <div class="addnewBtns">
+            <div>
+              <img src="/static/design/images/upload.svg" alt="New Items"/>
+              <h3>Simple Filter Step</h3>
+              <p>Description for lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quis arcu a dolor sit amet.</p>
+            </div>
+            <div>
+              <img src="/static/design/images/upload.svg" alt="New Items"/>
+              <h3>Simple Filter Step</h3>
+              <p>Description for lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quis arcu a dolor sit amet.</p>
+            </div>
+            <div>
+              <img src="/static/design/images/upload.svg" alt="New Items"/>
+              <h3>Simple Filter Step</h3>
+              <p>Description for lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quis arcu a dolor sit amet.</p>
+            </div>
+            <div>
+              <img src="/static/design/images/upload.svg" alt="New Items"/>
+              <h3>Simple Filter Step</h3>
+              <p>Description for lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quis arcu a dolor sit amet.</p>
+            </div>
+            <div>
+              <img src="/static/design/images/upload.svg" alt="New Items"/>
+              <h3>Simple Filter Step</h3>
+              <p>Description for lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quis arcu a dolor sit amet.</p>
+            </div>
+            <div>
+              <img src="/static/design/images/upload.svg" alt="New Items"/>
+              <h3>Simple Filter Step</h3>
+              <p>Description for lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quis arcu a dolor sit amet.</p>
+            </div>
+            <div>
+              <img src="/static/design/images/upload.svg" alt="New Items"/>
+              <h3>Simple Filter Step</h3>
+              <p>Description for lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quis arcu a dolor sit amet.</p>
+            </div>
+            <div>
+              <img src="/static/design/images/upload.svg" alt="New Items"/>
+              <h3>Simple Filter Step</h3>
+              <p>Description for lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quis arcu a dolor sit amet.</p>
+            </div>
+            <div>
+              <img src="/static/design/images/upload.svg" alt="New Items"/>
+              <h3>Simple Filter Step</h3>
+              <p>Description for lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quis arcu a dolor sit amet.</p>
+            </div>
+            <div>
+              <img src="/static/design/images/upload.svg" alt="New Items"/>
+              <h3>Simple Filter Step</h3>
+              <p>Description for lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quis arcu a dolor sit amet.</p>
+            </div>
+            <div>
+              <img src="/static/design/images/upload.svg" alt="New Items"/>
+              <h3>Simple Filter Step</h3>
+              <p>Description for lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quis arcu a dolor sit amet.</p>
+            </div>
+          </div>
+            <button class="reportAddBtn">Add</button>
+        </div>
+        
+      </div>
+    </div>
+  </div> 
+{% endblock %}
+
+{% block extra_scripts %}
+  <script>
+      var DATA = {{ step_types_data | safe}};
+      var KPI_CATEGORIES = {{ kpi_categories | safe }};
+      var CATEGORY_METRICS = {{ category_metrics | safe }};
+      var KPI_ACTION_CHOICES = {{ kpi_action_choices | safe }};
+      var KPI_MEASUREMENT_CHOICES = {{ kpi_measurement_choices | safe }};
+      var TOPICS = {{ topics | safe }};
+      var SCHEMAS_FIELDS = {{ schemas_fields | safe }};
+      var FUNCTIONS = {{ functions | safe }};
+      var FUNCTION_ENDPOINTS = {{ function_endpoints | safe }};
+      var STEP_TYPES = {{ step_types | safe }};
+      var RECIPIENTS = {{ recipients | safe }};
+      var DATA_DICTIONARIES = {{ data_dictionaries | safe }};
+      var SCHEMAS = {{ schemas | safe }};
+      var SEARCHES = {{ searches | safe }};
+      const HEADERS = {'X-CSRFToken': $("input[name='csrfmiddlewaretoken']").val()};
+
+      $('#submit').click(function (e) {
+          e.preventDefault();
+          var data = new FormData;
+          var inputs = $('input, select, textarea');
+          inputs.each(function () {
+              var value = $(this).val(),
+                  name = $(this).attr('name');
+              data.append(name, value);
+          });
+
+          jQuery.ajax({
+              url: '{% url 'projects:streamprocessors:new' project_id=current_project.id %}',
+              type: "POST",
+              headers: HEADERS,
+              data: data,
+              processData: false,
+              contentType: false,
+              success: function () {
+                  window.location =  "/react" + '{% url 'projects:streamprocessors:streamprocessors_list' project_id=current_project.id %}';
+              },
+              error: function (response) {
+                  if (response.responseJSON && response.responseJSON.error) {
+                      $('#invalid_form').empty();
+                      $.each(response.responseJSON.error, function (key, value) {
+                          for (let j in value) {
+                              $('#invalid_form').append(`<span class="card__field card__field--red">${key.charAt(0).toUpperCase() + key.slice(1,)}: ${value[j]}</span>`);
+                          }
+                      });
+                      $('#invalid_form').show();
+                  } else {
+                      $('#invalid_form').empty();
+                      $('#invalid_form').hide();
+                  }
+              }
+          });
+      });
+
+      {#$("input#id_name").on({#}
+      {#    keydown: function(e) {#}
+      {#        if (e.which === 32)#}
+      {#            return false;#}
+      {#    },#}
+      {#    change: function() {#}
+      {#        this.value = this.value.replace(/\s/g, "");#}
+      {#    }});#}
+
+  </script>
+  <script src="{% static 'streamprocessors/js/edit.js' %}"></script>
+{% endblock %}

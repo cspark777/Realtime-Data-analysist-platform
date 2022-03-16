@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <h2 class="project-name">{{ current_project }}</h2>
+    <h2 class="dashboard__header">Manage Metrics & Key Performance Indicators</h2>
+    {% if kpis %}
+        <table class="table-styled table-styled--generic" id="data-table">
+            <tbody>
+            <tr>
+                <th>Category Name</th>
+                <th>Metric</th>
+                <th>Type</th>
+                <th>Action</th>
+            </tr>
+
+            {% for kpi in kpis %}
+                <tr>
+                    <td>{{ kpi.category }}</td>
+                    <td>{{ kpi.metric }}</td>
+                    <td>{{ kpi.get_indicator_type_display }}</td>
+                    <td>
+                        <a href="{% url 'projects:streamprocessors:kpis:edit_kpi' project_id=current_project.id KPI_id=kpi.id %}"
+                           class="card-action edit">
+                            <span class="helper">Edit</span>
+                        </a>
+                        <a href="{% url 'projects:streamprocessors:kpis:delete_kpi' project_id=current_project.id KPI_id=kpi.id %}"
+                           class="card-action delete">
+                            <span class="helper">Delete</span>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="empty">
+            <span class="empty__text">No Metrics are available.</span>
+            <img src="{% static 'design/images/empty-kpi.svg' %}" width="155" height="134" alt="no data" class="empty__image">
+        </div>
+    {% endif %}
+
+    <div class="dashboard__footer">
+        <a class="btn" href="{% url 'projects:streamprocessors:kpis:new_kpi' project_id=current_project.id %}">
+            Add Metric
+        </a>
+    </div>
+
+    {% if is_paginated %}
+        <div>
+        <span>
+            {% if page_obj.has_previous %}
+                <a class="btn btn-default" href="?page=1">&laquo; First</a>
+                <a class="btn btn-default" href="?page={{ previous_page_number }}">Previous</a>
+            {% endif %}
+            <span class="btn btn-default" style="opacity: 1; pointer-events: none;">
+                Page {{ page_obj.number }} of {{ paginator.num_pages }}.
+            </span>
+            {% if page_obj.has_next %}
+                <a class="btn btn-default" href="?page={{ page_obj.next_page_number }}">Next</a>
+                <a class="btn btn-default" href="?page={{ paginator.num_pages }}">Last &raquo;</a>
+            {% endif %}
+        </span>
+        </div>
+    {% endif %}
+{% endblock %}
+

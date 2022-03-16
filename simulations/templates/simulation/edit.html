@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load extras %}
+
+{% block content %}
+     
+      <h2 class="project-name">{{ current_project }}</h2>
+      <h2 class="dashboard__header">Edit Simulation</h2>
+      <form autocomplete="off" method="post">
+        <div class="new-item new-item--simulation wrapper" id="simulation-table">
+            <div id="invalid_form" hidden>
+            </div>
+            <div class="new-item__title">
+                {% csrf_token %}
+                {% for field in form %}
+                    {% if field.name == 'type_event' %}
+                      <div class="styled-select new-item__event-type">
+                        {{ field }}
+                      </div>
+                    {% else %}
+                      {{ field }}
+                    {% endif %}
+                    {% if field.help_text %}
+                        <span class="card__field">{{ field.help_text }}</span>
+                    {% endif %}
+                {% endfor %}
+                <div class="styled-select new-item__run-type">
+                    <select name="run_type" id="run_type" onchange="runTypeChanged(this)">
+                        {% for option in run_type_choices %}
+                            <option value="{{ option.0 }}" {% if option.0 == simulation.run_type %}selected{% endif %}>{{ option.1 }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="add-inputs run_type--additional" style="grid-area: 4/1/5/13">
+                        {% if simulation.run_type == 'count' %}
+                            <input name="run_count" placeholder="Run count" value="{{ simulation.run_count }}" required id="id_run_count">
+                        {% elif simulation.run_type == 'time' %}
+                            <input name="run_time" placeholder="Run time" value="{{ simulation.run_time }}" required id="id_run_time">
+                        {% endif %}
+                </div>
+          </div>
+          <div class="new-item__body">
+              <style>
+                th:nth-child(1) { width: 18% }
+                th:nth-child(2) { width: 20% }
+                th:nth-child(3) { width: 36% }
+                th:nth-child(4) { width: 16% }
+              </style>
+              {% for step in steps %}
+                  <table class="new-item__step" id="steps-table">
+                        <tr>
+                            <th>Step Name</th>
+{#                            <th>Description</th>#}
+                            <th>Topic</th>
+                            <th>Event Definition</th>
+                            <th>Delay</th>
+                            <th>Actions</th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <input type="text" name="name_{{ step.id }}" value="{{ step.name }}">
+                            </td>
+{#                            <td>#}
+{#                                <textarea name="description_{{ step.id }}" id="">{{ step.description }}</textarea>#}
+{#                            </td>#}
+                            <td>
+                                 <div class="styled-select">
+                                    <select name="topic_{{ step.id }}" onchange="topicChanged(this, '{{ step.id }}')">
+                                        {% for topic in topics %}
+                                            <option value="{{ topic.name }}"
+                                                {% if topic.name == step.topic %}selected{% endif %}>{{ topic.display_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="styled-select">
+                                    <select name="definition_type_{{ step.id }}" onchange="definitionTypeChanged(this, '{{ step.id }}')">
+                                        {% for type in definition_types %}
+                                            <option value="{{ type.0 }}"
+                                                {% if type.0 == step.definition_type %}selected{% endif %}>{{ type.1 }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="event-container">
+                                    {% if step.definition_type == 'definition_json' %}
+                                        <input name="event_{{ step.id }}" value="{{ step.event }}"/>
+                                    {% else %}
+                                        {% for field in schema_fields|get_item:step.topic %}
+                                            <input name="schema_{{ field }}_{{ step.id }}"
+                                               value="{{ step.event|get_item_str:field }}" placeholder="{{ field }}"/>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                                <label class="checkbox-container">
+                                    Contains Regular Expression
+                                    <input type="checkbox" name="is_regexp_{{ step.id }}" value="{{ step.is_regexp }}" {% if step.is_regexp %}checked{% endif %}>
+                                    <span class="checkmark"></span>
+                                </label>
+                            </td>
+                            <td>
+                                <div class="styled-select">
+                                    <select name="delay_type_{{ step.id }}" data-step_id="{{ step.id }}" onchange="delayTypeChanged(this)">
+                                        {% for option in delay_types %}
+                                            <option value="{{ option.0 }}" {% if option.0 == step.delay_type %}selected{% endif %}>{{ option.1 }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="add-selects" data-step_id="{{ step.id }}">
+                                        {% if step.delay_type == 'random' %}
+                                            <input name="random_value_{{ step.id }}" value="{{ step.random_value }}"/>
+                                        {% else %}
+                                            <input name="static_value_{{ step.id }}" value="{{ step.static_value }}"/>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <input type="hidden" name="ordering_{{ step.id }}" class="ordering_new" value="{{ step.ordering }}"/>
+                            </td>
+                            <td class="new-item__actions">
+                                <button class="card-action arrow-bot js-down"></button>
+                                <button class="card-action arrow-top js-up"></button>
+                                <button class="card-btn card-btn--delete js-delete">
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+                  </table>
+              {% endfor %}
+          </div>
+
+          <div style="display: flex; justify-content: flex-end">
+                <button type="button" class="btn btn--step " id="add-step">Add new</button>
+                <button type="button" class="btn btn--step" id="add-bulk-step">New Bulk Steps</button>
+          </div>
+          <div class="new-item__footer">
+                <button class="btn" type="submit" id="submit">Submit</button>
+          </div>
+          {% if form.errors.exception %}
+                <span class="card__field card__field--red">{{ form.errors.exception }}</span>
+          {% endif %}
+
+        <div class="deleted_steps"></div>
+        </div>
+
+      </form>
+      <div id="loading-div">Loading...</div>
+    
+{% endblock %}
+
+{% block extra_scripts %}
+  <script>
+    var TOPICS = {{ topics | safe }};
+    var DELAYTYPES = {{ delay_types | safe }};
+    var SCHEMA_FIELDS = {{ schema_fields|safe }};
+    var DEFINITION_TYPES = {{ definition_types|safe }};
+  </script>
+  <script src="{% static 'simulations/js/edit.js' %}"></script>
+  <script>
+    const HEADERS = {'X-CSRFToken': $("input[name='csrfmiddlewaretoken']").val()};
+    var $loading = $('#loading-div').hide();
+    var submitBtn = $('#submit');
+
+    submitButton.click(function (e) {
+      e.preventDefault();
+      var data = new FormData;
+      var inputs = $('input, select, textarea');
+      var hasFile = false;
+
+      inputs.each(function () {
+        var value = $(this).val(),
+          name = $(this).attr('name');
+        if ($(this).attr('type') === 'file') {
+          data.append(name, this.files[0])
+          hasFile = true;
+        } else {
+          data.append(name, value);
+        }
+      });
+
+      jQuery.ajax({
+        url: '{% url 'projects:simulations:edit_simulation' project_id=current_project.id simulation_id=simulation.id %}',
+        type: "POST",
+        headers: HEADERS,
+        data: data,
+        processData: false,
+        contentType: false,
+        success: function (resp) {
+            if(hasFile){
+                location.reload();
+            }
+            else{
+                window.location =  "/react" + '{% url 'projects:simulations:simulations_list' project_id=current_project.id %}';
+            }
+        },
+        beforeSend: function() {
+          $loading.show();
+          submitBtn.attr('disabled', true);
+        },
+        complete: function() {
+          $loading.hide();
+          submitBtn.attr('disabled', false);
+        },
+        error: function (response) {
+          if (response.responseJSON && response.responseJSON.error) {
+            $('#invalid_form').empty();
+            $.each(response.responseJSON.error, function (key, value) {
+              for (let j in value) {
+                $('#invalid_form').append(`<span class="card__field card__field--red">${key.charAt(0).toUpperCase() + key.slice(1,)}: ${value[j]}</span>`);
+              }
+            });
+            $('#invalid_form').show();
+          } else {
+            $('#invalid_form').empty();
+            $('#invalid_form').hide();
+          }
+        }
+      });
+
+    });
+  </script>
+{% endblock %}

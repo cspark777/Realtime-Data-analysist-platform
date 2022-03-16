@@ -1,0 +1,177 @@
+<div class="row">
+  <div class="col-sm-12">
+    <table id="reports-summary">
+      <thead>
+        <tr>
+          <th colspan=4 class="text-center">
+            {{ report_item.kpi_category }} ({{ report_item.get_time_window_display }})
+          </th>
+        </tr>
+        <tr id="summaryHeaders">
+          <th>Min value</th>
+          <th>Max value</th>
+          <th>Average</th>
+          <th>Total entries</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr id="summaryValues">
+          <td id="kpi_min_{{ report_item.id }}"></td>
+          <td id="kpi_max_{{ report_item.id }}"></td>
+          <td id="kpi_avg_{{ report_item.id }}"></td>
+          <td id="kpi_rows_count_{{ report_item.id }}"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<canvas id="metrics_{{ report_item.id }}" width="400" height="200"></canvas>
+
+<script>
+(async function() {
+    let timeSeriesChart = document.getElementById("metrics_{{ report_item.id }}");
+    if (!timeSeriesChart) return;
+    let ctx = timeSeriesChart.getContext("2d");
+
+    let time_window = '{{ report_item.time_window }}';
+    let time_window_param = time_window ? `?time_window=${time_window}` : '';
+
+    const kpi_data = await jQuery.ajax({
+        url: `{% url "projects:streamprocessors:kpis:get_report_data" project_id=current_project.id KPI_id=report_item.kpi_metric %}${time_window_param}`,
+    });
+
+    const values = kpi_data['kpi_data_rows'].map(a => parseFloat(a['value']));
+    const max = Math.max.apply(Math, values);
+    const min = Math.min.apply(Math, values);
+    const avg = values.reduce(( p, c ) => p + c, 0) / values.length;
+
+    $('#kpi_min_{{ report_item.id }}').text(min);
+    $('#kpi_max_{{ report_item.id }}').text(max);
+    $('#kpi_avg_{{ report_item.id }}').text(avg.toFixed(2));
+    $('#kpi_rows_count_{{ report_item.id }}').text(kpi_data['kpi_data_rows_count']);
+
+
+    function generateData() {
+        let data = [];
+        kpi_data['kpi_data_rows'].forEach(row => {
+            data.push({t: new Date(row.time), 'y': row.value});
+        });
+
+        return data;
+    }
+
+    ctx.canvas.width = $('.card-large').first().width();
+    ctx.canvas.height = 400;
+
+    const color = Chart.helpers.color;
+
+    const cfg = {
+        data: {
+            datasets: [
+                {
+                    label: "KPI Value",
+                    data: generateData(),
+                    type: "line",
+                    pointRadius: 0,
+                    fill: false,
+                    lineTension: 0,
+                    borderWidth: 2
+                }
+            ]
+        },
+        options: {
+            responsive: false,
+            animation: {
+                duration: 0
+            },
+            scales: {
+                xAxes: [
+                    {
+                        type: "time",
+                        distribution: "series",
+                        offset: true,
+                        ticks: {
+                            major: {
+                                enabled: true,
+                                fontStyle: "bold"
+                            },
+                            source: "data",
+                            autoSkip: true,
+                            autoSkipPadding: 75,
+                            maxRotation: 0,
+                            sampleSize: 100
+                        },
+                        time: {
+                            tooltipFormat: 'll HH:mm',
+                            unit: 'day',
+                            unitStepSize: 1,
+                            displayFormats: {
+                                'day': 'll HH:mm'
+                            }
+                        },
+                        afterBuildTicks: function (scale, ticks) {
+                            var majorUnit = scale._majorUnit;
+                            var firstTick = ticks[0];
+                            var i, ilen, val, tick, currMajor, lastMajor;
+
+                            val = moment(ticks[0].value);
+                            if (
+                                (majorUnit === "minute" && val.second() === 0) ||
+                                (majorUnit === "hour" && val.minute() === 0) ||
+                                (majorUnit === "day" && val.hour() === 9) ||
+                                (majorUnit === "month" &&
+                                    val.date() <= 3 &&
+                                    val.isoWeekday() === 1) ||
+                                (majorUnit === "year" && val.month() === 0)
+                            ) {
+                                firstTick.major = true;
+                            } else {
+                                firstTick.major = false;
+                            }
+                            lastMajor = val.get(majorUnit);
+
+                            for (i = 1, ilen = ticks.length; i < ilen; i++) {
+                                tick = ticks[i];
+                                val = moment(tick.value);
+                                currMajor = val.get(majorUnit);
+                                tick.major = currMajor !== lastMajor;
+                                lastMajor = currMajor;
+                            }
+                            return ticks;
+                        }
+                    }
+                ],
+                yAxes: [
+                    {
+                        gridLines: {
+                            drawBorder: false
+                        },
+                        scaleLabel: {
+                            display: true,
+                            labelString: "KPI Value"
+                        }
+                    }
+                ]
+            },
+            tooltips: {
+                intersect: false,
+                mode: "index",
+                callbacks: {
+                    label: function (tooltipItem, myData) {
+                        var label =
+                            myData.datasets[tooltipItem.datasetIndex].label || "";
+                        if (label) {
+                            label += ": ";
+                        }
+                        label += parseFloat(tooltipItem.value).toFixed(2);
+                        return label;
+                    }
+                }
+            }
+        }
+    };
+
+    const myChart = new Chart(ctx, cfg);
+})();
+</script>

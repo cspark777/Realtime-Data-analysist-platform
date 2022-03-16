@@ -1,0 +1,220 @@
+{% load extras %}
+{% load static %}
+{% load mptt_tags %}
+<table class="new-item__step {% if step.steptype == 'inbound' %}inbound{% endif %}"
+       id="steps-table">
+  <tbody>
+  <tr>
+    <th>Step Name</th>
+    <th>Step Type</th>
+    <th>Actions</th>
+  </tr>
+  <tr>
+    <td><input name="name_{{ step.id }}" value="{{ step.name }}" class="required"/></td>
+    <td>
+      <div class="styled-select">
+        <select name="steptype_{{ step.id }}" class="step" data-step_id="{{ step.id }}"
+                onchange="stepTypeChanged(this)">
+          {% if step.steptype == 'inbound' or step.steptype == 'inboundtimer' or step.steptype == 'inboundttp' or step.steptype == 'inboundkpi' %}
+            {% for step_type in step_type_options.inbound %}
+              <option value="{{ step_type.0 }}"
+                      {% if step_type.0 == step.steptype %}selected{% endif %}>{{ step_type.1 }}</option>
+            {% endfor %}
+          {% elif step.steptype == 'outbound' or step.steptype == 'outboundemail' or step.steptype == 'outboundsms' or step.steptype == 'outboundweb' %}
+            {% for step_type in step_type_options.outbound %}
+              <option value="{{ step_type.0 }}"
+                      {% if step_type.0 == step.steptype %}selected{% endif %}>{{ step_type.1 }}</option>
+            {% endfor %}
+          {% else %}
+            {% for step_type in step_type_options.processor %}
+              <option value="{{ step_type.0 }}"
+                      {% if step_type.0 == step.steptype %}selected{% endif %}>{{ step_type.1 }}</option>
+            {% endfor %}
+          {% endif %}
+        </select>
+      </div>
+
+      <div class="add-selects" data-step_id="{{ step.id }}">
+        {% for key, value in step_types_data.items %}
+          {% if key == step.steptype %}
+            {% for item in value.fields %}
+              {% if item.name == "block" %}
+                {% if step.get_children %}
+                  {% for leaf in step.get_children %}
+                    <div class="sub-selects">
+                      {% for leaf_item in item.fields %}
+                            {% include 'streamprocessors/leaf_fields.html' %}
+                      {% endfor %}
+                      {% if step.steptype == 'lookup' %}
+                            <div class="card-btn card-btn--delete js-block-delete" style="width: 120px">Delete</div>
+                      {% endif %}
+                    </div>
+
+                  {% endfor %}
+                {% endif %}
+                {% if step.steptype == 'map_event' %}
+                  <div class="card-btn card-btn--add-filter add-map" style="margin-bottom: 10px">
+                    New Map
+                  </div>
+                {% elif step.steptype != 'select' %}
+                  {% if step.steptype == 'lookup' %}
+                    <div class="card-btn card-btn--add-filter add-filter-lookup" style="margin-bottom: 10px">
+                  {% elif step.steptype == 'filter' %}
+                    <div class="card-btn card-btn--add-filter add-filter" style="margin-bottom: 10px">
+                  {% endif %}
+                New Filter
+                </div>
+                {% else %}
+                  <div class="card-btn card-btn--add-filter add-select-field"
+                       style="margin-bottom: 10px">
+                    New Field
+                  </div>
+                {% endif %}
+              {% else %}
+                {% include 'streamprocessors/step_fields.html' %}
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        {% endfor %}
+
+        {% if step.result_placement == "publish" %}
+          <div class="styled-select">
+            <select name="lookup_stream_{{ step.id }}"
+                    class="step result_placement--additional"
+                    data-step_id="{{ step.id }}"
+                    data-popover-body="{{ step_types_data | get_step_type_field:'lookup_stream' | get_item:'popover' | get_item:"bottom_text" }}"
+                    data-popover-title="{{ step_types_data | get_step_type_field:'lookup_stream' | get_item:'popover' | get_item:"top_text" }}">
+
+              {% for topic in topics %}
+                <option value="{{ topic.name }}"
+                        {% if step.lookup_stream and step.lookup_stream == topic.name %}selected{% endif %}>
+                  {{ topic.display_name }}
+                </option>
+              {% endfor %}
+
+            </select>
+          </div>
+
+        {% elif step.result_placement == "aggregate" %}
+          <div class="styled-select">
+            <select name="operator_{{ step.id }}"
+                    class="step result_placement--additional"
+                    data-step_id="{{ step.id }}"
+                    data-popover-body="{{ step_types_data | get_step_type_field:'operator' | get_item:'popover' | get_item:"bottom_text" }}"
+                    data-popover-title="{{ step_types_data | get_step_type_field:'operator' | get_item:'popover' | get_item:"top_text" }}">
+
+              {% for option in step_types_data.lookup.fields.6.choices %}
+                <option value="{{ option.0 }}"
+                        {% if option.0 == step.operator %}selected{% endif %}>{{ option.1 }}</option>
+              {% endfor %}
+
+            </select>
+          </div>
+
+                    <div class="styled-select">
+                        <select name="column_name_{{ step.id }}"
+                               class="result_placement--additional"
+                               data-popover-body="{{ step_types_data | get_step_type_field:'column_name' | get_item:'popover' | get_item:"bottom_text" }}"
+                               data-popover-title="{{ step_types_data | get_step_type_field:'column_name' | get_item:'popover' | get_item:"top_text" }}"
+                        >
+                            {% for schema_fields in schemas_fields %}
+                                  {% if step.stream.0.name == schema_fields.stream %}
+                                    {% for schema_field in schema_fields.fields %}
+                                      <option value="{{ schema_field.name }}"
+                                          {% if step.column_name and step.column_name == schema_field.name %} selected {% endif %}>
+                                          {{ schema_field.name }}
+                                      </option>
+                                      {% endfor %}
+                                  {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+
+          <div class="styled-select">
+            <select name="destinations_{{ step.id }}"
+                    class="step result_placement--additional"
+                    data-step_id="{{ step.id }}"
+                    data-popover-body="{{ step_types_data | get_step_type_field:'destinations' | get_item:'popover' | get_item:"bottom_text" }}"
+                    data-popover-title="{{ step_types_data | get_step_type_field:'destinations' | get_item:'popover' | get_item:"top_text" }}">
+
+              {% for option in step_types_data.lookup.fields.8.choices %}
+                <option value="{{ option.0 }}"
+                        {% if option.0 == step.destinations %}selected{% endif %}>{{ option.1 }}</option>
+              {% endfor %}
+
+            </select>
+          </div>
+
+          {% if step.destinations == 'variable' %}
+            <input name="variable_name_to_{{ step.id }}"
+                   value="{{ step | lookup:"variable_name_to" }}"
+                   class="result_placement--additional--to"
+                   placeholder="variable_name_to"
+                   data-popover-body="{{ step_types_data | get_step_type_field:'variable_name_to' | get_item:'popover' | get_item:"bottom_text" }}"
+                   data-popover-title="{{ step_types_data | get_step_type_field:'variable_name_to' | get_item:'popover' | get_item:"top_text" }}"/>
+
+          {% elif step.destinations == 'event' %}
+            <select name="destination_field_name_{{ step.id }}"
+                    class="result_placement--additional--to"
+                    data-popover-body="{{ step_types_data | get_step_type_field:'destination_field_name' | get_item:'popover' | get_item:"bottom_text" }}"
+                    data-popover-title="{{ step_types_data | get_step_type_field:'destination_field_name' | get_item:'popover' | get_item:"top_text" }}"
+            >
+              {% for schema_fields in schemas_fields %}
+                {% if step.stream.0.name == schema_fields.stream %}
+                  {% for schema_field in schema_fields.fields %}
+                    <option value="{{ schema_field.name }}"
+                        {% if step.destination_field_name and step.destination_field_name == schema_field.name %}
+                            selected {% endif %}>
+                      {{ schema_field.name }}
+                    </option>
+                  {% endfor %}
+                {% endif %}
+              {% endfor %}
+            </select>
+          {% endif %}
+
+        {% endif %}
+
+        </div>
+    </td>
+    <td class="new-item__actions">
+      <input type="hidden" name="ordering_{{ step.id }}" class="ordering_new"
+             value="{{ step.ordering }}"/>
+      {% if not forloop.first and not forloop.last %}
+        <button class="card-action arrow-bot js-down"></button>
+        <button class="card-action arrow-top js-up"></button>
+      {% endif %}
+      {% if not forloop.first %}
+        <button class="card-btn card-btn--delete js-delete">Delete</button>
+      {% endif %}
+    </td>
+  </tr>
+  <tr>
+    <td>Schema: <span class="schema">{{ step.schema }}</span></td>
+  </tr>
+  </tbody>
+</table>
+<div class="schema-additional-info">
+  <span class="schema-btn">{{ step.schema }}</span>
+  <div class="schema-popup hide">
+    <div class="schema-popup-wrapper">
+          <div class="schema-popup-content">
+      <table class="schema-table">
+        <thead>
+        <tr>
+          <th>Field Name</th>
+          <th>Type</th>
+        </tr>
+        </thead>
+        {% for schema_fields in schemas_fields %}
+            {% if step.stream.0.name == schema_fields.stream %}
+                {% for schema_field in schema_fields.fields %}
+                    <tr><td>{{ schema_field.name }}</td><td>{{ schema_field.value }}</td></tr>
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
+      </table>
+    </div>
+    </div>
+  </div>
+</div>

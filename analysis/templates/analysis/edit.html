@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+{% load static %}
+{% load extras %}
+{% block content %}
+  <style>
+    th:nth-child(1) { width: 20% }
+    th:nth-child(2) { width: 22% }
+    th:nth-child(3) { width: 35% }
+    .new-item__actions { justify-content: start }
+    .new-item__actions button:not(:nth-child(2)) { margin-left: 5px;}
+    #add-item-button-group {
+      display: flex;
+      justify-content: center;
+      margin-top: 40px;
+    }
+
+    .btn--step {
+      height: 44px;
+      margin-right: 3px;
+    }
+  </style>
+
+<h2 class="project-name">{{ current_project }}</h2>
+<h2 class="dashboard__header">Edit Report</h2>
+
+  <form autocomplete="off" method="POST" class="form-horizontal form-groups-bordered">
+    <div class="row" id="report-table">
+      {% csrf_token %}
+      <div class="new-item__title">
+        {% for field in form %}
+            {{ field }}
+            {% if field.help_text %}
+              <small class="text-primary">{{ field.help_text }}</small>
+            {% endif %}
+            {% for error in field.errors %}
+              <p class="alert alert-danger">{{ error }}</p>
+            {% endfor %}
+        {% endfor %}
+      </div>
+    </div>
+
+    {% if form.errors.exception %}
+      <p class="alert alert-danger">{{ form.errors.exception }}</p>
+    {% endif %}
+
+
+    <div class="new-item__body">
+      {% if report_items.exists %}
+        {% for report_item in report_items %}
+          <table style="margin-bottom: 46px" class="new-item__step" id="report-item-table">
+            <tbody>
+            <tr>
+              <th>Item Title</th>
+              <th>Description</th>
+              <th>Item Type</th>
+              <th>Ordering</th>
+            </tr>
+            <tr>
+              <td class="align-top"><input name="name_{{ report_item.id }}" value="{{ report_item.name }}" class="required"/></td>
+              <td class="align-top"><textarea name="description_{{ report_item.id }}">{{ report_item.description }}</textarea></td>
+              <td>
+                <div class="styled-select">
+                  <select name="type_{{ report_item.id }}"
+                          data-report_item_id="{{ report_item.id }}"
+                          onchange="reportItemTypeChanged(this)">
+                    {% for report_type in report_types %}
+                      <option value="{{ report_type.0 }}"
+                              {% if report_type.0 == report_item.type %}selected{% endif %}>{{ report_type.1 }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="add-selects" data-report_item_id="{{ report_item.id }}">
+                  {% for key, value in report_types_data.items %}
+                    {% if key == report_item.type %}
+                      {% for item in value.fields %}
+                        {% if item.input_type == "select" %}
+                        <div class="styled-select">
+                          <select name="{{ item.name }}_{{ report_item.id }}"
+                                  data-report_item_id="{{ report_item.id }}">
+                            {% if item.name == 'record_type' %}
+                              {% for record_type in record_types %}
+                                <option value="{{ record_type.name }}"
+                                        {% if report_item.record_type and report_item.record_type == record_type.name %}selected{% endif %}>
+                                    {{ record_type.display_name }}
+                                </option>
+                              {% endfor %}
+                            {% endif %}
+                            {% if item.name == 'time_window' %}
+                              {% for value, text in time_window_choices %}
+                                <option value="{{ value }}" {% if report_item.time_window == value%}selected="true"{% endif %}>
+                                  {{ text }}
+                                </option>
+                              {% endfor %}
+                            {% endif %}
+                            {% if item.name == 'filter_type' %}
+                              {% for value, text in filter_type_choices %}
+                                <option value="{{ value }}" {% if report_item.filter_type == value%}selected="true"{% endif %}>
+                                  {{ text }}
+                                </option>
+                              {% endfor %}
+                            {% endif %}
+                            {% if item.name == 'plot_type' %}
+                              {% for value, text in plot_type_choices %}
+                                <option value="{{ value }}" {% if report_item.plot_type == value%}selected="true"{% endif %}>
+                                  {{ text }}
+                                </option>
+                              {% endfor %}
+                            {% endif %}
+                            {% if item.name == 'search_name' %}
+                              {% for search in saved_searches %}
+                                <option value="{{ search }}" {% if report_item.search_name == search%}selected="true"{% endif %}>
+                                  {{ search }}
+                                </option>
+                              {% endfor %}
+                            {% endif %}
+                            {% if item.name == 'kpi_category' %}
+                              {% for cat in kpi_categories %}
+                                <option value="{{ cat }}" {% if report_item.kpi_category == cat%}selected="true"{% endif %}>
+                                  {{ cat }}
+                                </option>
+                              {% endfor %}
+                            {% endif %}
+                            {% if item.name == 'kpi_metric' %}
+                              {% for metric in kpi_metrics|get_item:report_item.kpi_category %}
+                                <option value="{{ metric.id }}" {% if report_item.kpi_metric == metric.id %}selected="true"{% endif %}>
+                                  {{ metric.name }}
+                                </option>
+                              {% endfor %}
+                            {% endif %}
+                          </select>
+                        </div>
+                        {% elif item.input_type == 'schema_field_select' %}
+                            <div class="styled-select"
+                                    {% if report_item.filter_type == 'filter_none' and item.name == 'filter_field' %}
+                                        style="display: none" {% endif %}>
+                                <select name="{{ item.name }}_{{ report_item.id }}"
+                                        data-report_item_id="{{ report_item.id }}" class="schema-field">
+                                    {% if item.name == 'filter_field' %}
+                                        {% for field in schema_fields|get_item:report_item.record_type %}
+                                            <option value="{{ field.name }}"
+                                            {% if report_item.filter_field == field.name %}selected="true"{% endif %}>
+                                                {{ field.name }}
+                                            </option>
+                                        {% endfor %}
+                                    {% elif item.name == 'x_value' %}
+                                        {% for field in schema_fields|get_item:report_item.record_type %}
+                                            <option value="{{ field.name }}"
+                                            {% if report_item.x_value == field.name %}selected="true"{% endif %}>
+                                                {{ field.name }}
+                                            </option>
+                                        {% endfor %}
+                                    {% elif item.name == 'y_value' %}
+                                        {% for field in schema_fields|get_item:report_item.record_type %}
+                                            <option value="{{ field.name }}"
+                                            {% if report_item.x_value == field.name %}selected="true"{% endif %}>
+                                                {{ field.name }}
+                                            </option>
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                        {% else %}
+                          <input name="{{ item.name }}_{{ report_item.id }}" type="{{ item.input_type }}"
+                                 value="{{ report_item | lookup:item.name }}" class="form-control"
+                                 placeholder="{% if item.placeholder %}{{ item.placeholder }}{% else %}{{ item.name }}{% endif %}"
+
+                          {% if report_item.filter_type == 'filter_none' %}
+                            {% if item.name == 'filter_value' %}
+                              style="display: none"
+                            {% endif %}
+                          {% endif %}
+                          {% if report_item.plot_type != 'value_from_report' %}
+                            {% if item.name == 'y_value' %}
+                              style="display: none"
+                            {% endif %}
+                          {% endif %}
+                          />
+                        {% endif %}
+                      {% endfor %}
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              </td>
+              <td class="new-item__actions">
+                <input type="hidden" name="ordering_{{ report_item.id }}" value="{{ report_item.ordering }}" class="form-control"/>
+                <button class="card-action arrow-bot js-down"></button>
+                <button class="card-action arrow-top js-up"></button>
+                <button class="card-btn card-btn--delete js-delete">Delete</button>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        {% endfor %}
+      {% endif %}
+    </div>
+
+    <div class="add_btn">
+      <button type="button" class="btn" data-toggle="modal" data-target="#exampleModal">
+        Add Items
+      </button>
+    </div>
+
+    {% include 'analysis/new_item_modal.html' %}
+
+    <div class="new-item__footer" style="margin-bottom: 30px">
+      <button class="btn" type="submit" id="submit">Submit</button>
+    </div>
+  </form>
+
+{% endblock %}
+
+{% block extra_scripts %}
+  <script>
+    var SCHEMA_FIELDS = {{ schema_fields|safe }};
+    var DATA = {{ report_types_data | safe}};
+    var RECORD_TYPES = {{ record_types | safe }};
+    var KPI_CATEGORIES = {{ kpi_categories | safe }};
+    var KPI_METRICS = {{ kpi_metrics | safe }};
+    var SAVED_SEARCHES = {{ saved_searches | safe }};
+  </script>
+  <script src="{% static 'analysis/js/edit.js' %}"></script>
+{% endblock %}

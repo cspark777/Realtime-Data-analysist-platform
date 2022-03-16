@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="information">
+        <h2 class="information__header">Edit Project</h2>
+        <form autocomplete="off" method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                {# {{ field.label }}#}
+                {{ field }}
+                <br><br>
+                {% if field.help_text %}
+                    <span class="card__field">{{ field.help_text }}</span>
+                {% endif %}
+                {% for error in field.errors %}
+                    <span class="card__field card__field--red" data-header="Status">{{ error }}</span>
+                {% endfor %}
+            {% endfor %}
+            <button class="btn" type="submit" id="submit">Submit</button>
+        </form>
+    </div>
+{% endblock %}

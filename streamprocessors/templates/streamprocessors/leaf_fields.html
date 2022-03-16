@@ -1,0 +1,247 @@
+{% load extras %}
+{% load static %}
+{% load mptt_tags %}
+
+{% if leaf_item.name != "variable_name_from" and leaf_item.name != "static_value_from" and leaf_item.name != "event_field_name_from" and leaf_item.name != "variable_name" and leaf_item.name != "operator" and  leaf_item.name != "column_name" and leaf_item.name != "lookup_stream" and leaf_item.name != "event_field_name" and leaf_item.name != "static_value" and leaf_item.name != "time_window" and leaf_item.name != "last_events" and leaf_item.name != "percent" or leaf_item.name == "field_name" and leaf_key == 'filter' %}
+    {% if leaf_item.input_type == "select" %}
+        <!-- select -->
+        <div class="styled-select">
+            <select name="block_parent_{{ step.id }}_{{ leaf_item.name }}_{{ leaf.id }}"
+                    {% if  leaf_item.name == 'field_name' and step.steptype == 'map_event' %}
+                        class="step field_first"
+                    {% elif leaf_item.name == 'target_field_name' and step.steptype == 'map_event' %}
+                        class="step field_second"
+                    {% else %}
+                        class="step"
+                    {% endif %}
+                    data-step_id="{{ leaf.id }}"
+                    data-popover-body="{{ leaf_item.popover.bottom_text }}"
+                    data-popover-title="{{ leaf_item.popover.top_text }}">
+                {% if leaf_item.name == 'category_metric' %}
+                    {% for leaf_item in category_metric %}
+                        <option value="{{ leaf_item.category }}, {{ leaf_item.metric }}"
+                                {% if leaf.category_name and leaf.metric and leaf.category_name == leaf_item.category and leaf.metric == leaf_item.metric %}selected{% endif %}>
+                            {{ leaf_item.category }}, {{ leaf_item.metric }}
+                        </option>
+                    {% endfor %}
+                {% elif leaf_item.name == 'topic' %}
+                    <option value="0">Please Select...</option>
+                    {% for topic in topics %}
+                        <option value="{{ topic.name }}"
+                                {% if leaf.topic and leaf.topic == topic.name %}selected{% endif %}>
+                            {{ topic.display_name }}
+                        </option>
+                    {% endfor %}
+                {% elif leaf_item.name == 'field_name' and step.steptype == 'map_event' %}
+                    {% for schema_fields in schemas_fields %}
+                        {% if leaf.parent.prev_step.stream.0.name == schema_fields.stream %}
+                            {% for schema_field in schema_fields.fields %}
+                                <option value="{{ schema_field.name }}"
+                                        {% if leaf.field_name and leaf.field_name == schema_field.name %}selected{% endif %}>
+                                    {{ schema_field.name }}
+                                </option>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                {% elif leaf_item.name == 'field_name' or leaf_item.name == 'select_field_name' or leaf_item.name == 'target_field_name' %}
+                    {% for schema_fields in schemas_fields %}
+                        {% if not leaf.parent.record_type and leaf.parent.stream.0.name == schema_fields.stream or leaf.parent.record_type == schema_fields.stream %}
+                            {% for schema_field in schema_fields.fields %}
+                                <option value="{{ schema_field.name }}"
+                                        {% if leaf.field_name and leaf.field_name == schema_field.name or leaf.select_field_name and leaf.select_field_name == schema_field.name %}selected{% endif %}>
+                                    {{ schema_field.name }}
+                                </option>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                {% elif leaf_item.name == 'data_dictionary_name' %}
+                    {% for dict in data_dictionaries %}
+                        <option value="{{ dict.name }}"
+                                {% if leaf.data_dictionary_name and leaf.data_dictionary_name == dict.name %}selected{% endif %}>
+                            {{ dict.name }}
+                        </option>
+                    {% endfor %}
+                {% elif leaf_item.name == 'record_type' %}
+                    {% for topic in topics %}
+                        <option value="{{ topic.name }}"
+                                {% if leaf.record_type and leaf.record_type == topic.name %}selected{% endif %}>
+                            {{ topic.display_name }}
+                        </option>
+                    {% endfor %}
+                {% elif leaf_item.name == 'task_recipient_id' %}
+                    {% for recipient in recipients %}
+                        <option value="{{ recipient.0 }}"
+                                {% if leaf.workflowtask_set.first.recipient_id == recipient.0 %}selected{% endif %}>
+                            {{ recipient.1 }}
+                        </option>
+                    {% endfor %}
+                {% elif leaf_item.name == 'key_type_from' %}
+                    {% for option in leaf_item.choices %}
+                        <option value="{{ option.0 }}"
+                                {% if option.0 == leaf.key_type_from %}selected{% endif %}>{{ option.1 }}</option>
+                    {% endfor %}
+                {% elif leaf_item.name != 'key_type_from' %}
+                    {% for option in leaf_item.choices %}
+                        <option value="{{ option.0 }}"
+                                {% if option.0 == leaf.topic or option.0 == leaf.result_placement_numeric or option.0 == leaf.keys_or_values or option.0 == leaf.value or option.0 == leaf.result_placement or option.0 == leaf.key_type or option.0 == leaf.last_event_type or option.0 == leaf.operator or option.0 == leaf.offset %}selected{% endif %}>{{ option.1 }}</option>
+                    {% endfor %}
+                {% endif %}
+            </select>
+        </div>
+        {% if leaf_item.name == "key_type" %}
+
+            {% if leaf.key_type == "static_value" %}
+
+                <input name="block_parent_{{ step.id }}_static_value_{{ leaf.id }}"
+                       value="{{ leaf | lookup:"static_value" }}"
+                       class="key_type--additional"
+                       placeholder="static_value"
+                       data-popover-body="{{ step_types_data | get_step_type_field:'static_value' | get_item:'popover' | get_item:"bottom_text" }}"
+                       data-popover-title="{{ step_types_data | get_step_type_field:'static_value' | get_item:'popover' | get_item:"top_text" }}"/>
+
+            {% elif leaf.key_type == "from_variable" %}
+
+                <input name="block_parent_{{ step.id }}_variable_name_{{ leaf.id }}"
+                       value="{{ leaf | lookup:"variable_name" }}"
+                       class="key_type--additional"
+                       placeholder="variable_name"
+                       data-popover-body="{{ step_types_data | get_step_type_field:'variable_name' | get_item:'popover' | get_item:"bottom_text" }}"
+                       data-popover-title="{{ step_types_data | get_step_type_field:'variable_name' | get_item:'popover' | get_item:"top_text" }}"/>
+
+                {#            {% elif leaf.key_type == "from_event" and leaf.steptype == "lookup" or leaf.key_type == "from_event" and leaf.steptype == "adjust" %}#}
+                {#                <input name="block_parent_{{ step.id }}_field_name_{{ leaf.id }}"#}
+                {#                       value="{{ leaf | lookup:"field_name" }}"#}
+                {#                       class="key_type--additional"#}
+                {#                       placeholder="field_name"#}
+                {#                       data-popover-body="{{ step_types_data | get_step_type_field:'field_name' | get_item:'popover' | get_item:"bottom_text" }}"#}
+                {#                       data-popover-title="{{ step_types_data | get_step_type_field:'field_name' | get_item:'popover' | get_item:"top_text" }}"/>#}
+
+            {% elif leaf.key_type == "from_event" %}
+                <select name="block_parent_{{ step.id }}_event_field_name_{{ leaf.id }}"
+                        class="key_type--additional"
+                        data-popover-body="{{ step_types_data | get_step_type_block_field:'event_field_name' | get_item:'popover' | get_item:"bottom_text" }}"
+                        data-popover-title="{{ step_types_data | get_step_type_block_field:'event_field_name' | get_item:'popover' | get_item:"top_text" }}"
+                >
+                    {% for schema_fields in schemas_fields %}
+                        {% if not leaf.parent.record_type and leaf.parent.stream.0.name == schema_fields.stream or leaf.parent.result_placement == 'replace' and leaf.parent.stream.1 == schema_fields.stream or leaf.parent.result_placement != 'replace' and leaf.parent.stream.0.name == schema_fields.stream %}
+                            {% for schema_field in schema_fields.fields %}
+                                <option value="{{ schema_field.name }}"
+                                        {% if leaf.event_field_name and leaf.event_field_name == schema_field.name %}selected{% endif %}>
+                                    {{ schema_field.name }}
+                                </option>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                </select>
+
+
+            {% elif leaf.key_type != 'one' %}
+                <input name="block_parent_{{ step.id }}_field_name_{{ leaf.id }}"
+                       value="{{ leaf | lookup:"field_name" }}"
+                       class="key_type--additional"
+                       placeholder="field_name"
+                       data-popover-body="{{ step_types_data | get_step_type_field:'field_name' | get_item:'popover' | get_item:"bottom_text" }}"
+                       data-popover-title="{{ step_types_data | get_step_type_field:'field_name' | get_item:'popover' | get_item:"top_text" }}"/>
+            {% endif %}
+
+        {% endif %}
+
+        {% if leaf_item.name == "key_type_from" %}
+
+            {% if leaf.key_type_from == "static_value" %}
+                <input name="block_parent_{{ step.id }}_static_value_from_{{ leaf.id }}"
+                       value="{{ leaf | lookup:"static_value_from" }}"
+                       class="key_type--additional--from"
+                       placeholder="static_value_from"
+                       data-popover-body="{{ step_types_data | get_step_type_block_field:'static_value_from' | get_item:'popover' | get_item:"bottom_text" }}"
+                       data-popover-title="{{ step_types_data | get_step_type_block_field:'static_value_from' | get_item:'popover' | get_item:"top_text" }}"/>
+
+            {% elif leaf.key_type_from == "from_variable" %}
+                <input name="block_parent_{{ step.id }}_variable_name_from_{{ leaf.id }}"
+                       value="{{ leaf | lookup:"variable_name_from" }}"
+                       class="key_type--additional--from"
+                       placeholder="variable_name_from"
+                       data-popover-body="{{ step_types_data | get_step_type_block_field:'variable_name_from' | get_item:'popover' | get_item:"bottom_text" }}"
+                       data-popover-title="{{ step_types_data | get_step_type_block_field:'variable_name_from' | get_item:'popover' | get_item:"top_text" }}"/>
+
+            {% elif leaf.key_type_from == "from_event" %}
+                <select name="block_parent_{{ step.id }}_event_field_name_from_{{ leaf.id }}"
+                        class="key_type--additional--from"
+                        data-popover-body="{{ step_types_data | get_step_type_block_field:'event_field_name_from' | get_item:'popover' | get_item:"bottom_text" }}"
+                        data-popover-title="{{ step_types_data | get_step_type_block_field:'event_field_name_from' | get_item:'popover' | get_item:"top_text" }}"
+                >
+                    {% for schema_fields in schemas_fields %}
+                        {% if not leaf.parent.record_type and leaf.parent.stream.0.name == schema_fields.stream or leaf.parent.result_placement == 'replace' and leaf.parent.stream.1 == schema_fields.stream or leaf.parent.result_placement != 'replace' and leaf.parent.stream.0.name == schema_fields.stream %}
+                            {% for schema_field in schema_fields.fields %}
+                                <option value="{{ schema_field.name }}"
+                                        {% if leaf.event_field_name_from and leaf.event_field_name_from == schema_field.name %}selected{% endif %}>
+                                    {{ schema_field.name }}
+                                </option>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            {% endif %}
+
+        {% endif %}
+
+        {% if leaf_item.name == "last_event_type" %}
+
+            {% if leaf.last_event_type == "last_events" %}
+
+                <input name="block_parent_{{ step.id }}_last_events_{{ leaf.id }}"
+                       value="{{ leaf | lookup:"last_events" }}"
+                       class="last_event_type--additional"
+                       placeholder="last_events"
+                       data-popover-body="{{ step_types_data | get_step_type_field:'last_events' | get_item:'popover' | get_item:"bottom_text" }}"
+                       data-popover-title="{{ step_types_data | get_step_type_field:'last_events' | get_item:'popover' | get_item:"top_text" }}"/>
+
+            {% else %}
+                <input name="block_parent_{{ step.id }}_time_window_{{ leaf.id }}"
+                       value="{{ leaf | lookup:"time_window" }}"
+                       class="last_event_type--additional"
+                       placeholder="time_window"
+                       data-popover-body="{{ step_types_data | get_step_type_field:'time_window' | get_item:'popover' | get_item:"bottom_text" }}"
+                       data-popover-title="{{ step_types_data | get_step_type_field:'time_window' | get_item:'popover' | get_item:"top_text" }}"/>
+
+            {% endif %}
+
+        {% endif %}
+
+        {% if leaf_item.name == "value" %}
+            {% if leaf.value == "<%<" or leaf.value == "<%>" or leaf.value == ">%<" or leaf.value == ">%>" %}
+                <input name="block_parent_{{ step.id }}_percent_{{ leaf.id }}"
+                       value="{{ leaf | lookup:"percent" }}"
+                       class="value--additional"
+                       placeholder="percent"
+                       data-popover-body="{{ step_types_data.lookup.fields.2.popover.bottom_text }}"
+                       data-popover-title="{{ step_types_data.lookup.fields.2.popover.top_text }}"/>
+            {% endif %}
+        {% endif %}
+
+    {% else %}
+        <!-- not select -->
+        {% if leaf_item.name == 'task_title' or leaf_item.name == 'task_description' %}
+            <input name="block_parent_{{ step.id }}_{{ leaf_item.name }}_{{ leaf.id }}"
+                   value="
+                           {% if leaf_item.name == 'task_title' %}{{ leaf.workflowtask_set.first.title }}{% else %}{{ leaf.workflowtask_set.first.description }}{% endif %}"
+                   placeholder="{{ leaf_item.name }}"
+                   data-popover-body="{{ leaf_item.popover.bottom_text }}"
+                   data-popover-title="{{ leaf_item.popover.top_text }}"
+            />
+        {% elif leaf_item.name == 'template' %}
+            <textarea name="block_parent_{{ step.id }}_{{ leaf_item.name }}_{{ leaf.id }}"
+                      placeholder="{{ leaf_item.name }}"
+                      data-popover-body="{{ leaf_item.popover.bottom_text }}"
+                      data-popover-title="{{ leaf_item.popover.top_text }}"
+            >{{ leaf | lookup:leaf_item.name }}</textarea>
+        {% else %}
+            <input name="block_parent_{{ step.id }}_{{ leaf_item.name }}_{{ leaf.id }}"
+                   value="{{ leaf | lookup:leaf_item.name }}"
+                   placeholder="{{ leaf_item.name }}"
+                   data-popover-body="{{ leaf_item.popover.bottom_text }}"
+                   data-popover-title="{{ leaf_item.popover.top_text }}"
+            />
+        {% endif %}
+    {% endif %}
+{% endif %}

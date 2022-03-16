@@ -1,0 +1,59 @@
+<div id="dialog" title="DATA Logs">
+    <table>
+        <td valign=top class="column1">
+            <div class="filter-item">
+                Component:
+                <select id="component" class="form-control">
+                    <option value="all">All</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                Priority:
+                <select id="priority" class="form-control">
+                    <option value="all">All</option>
+                    <option value="HIGH">High</option>
+                    <option value="MEDIUM">Medium</option>
+                    <option value="LOW">Low</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                Project:
+                <select id="project" class="form-control">
+                    <option value="all">All</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                Simulation:
+                <select id="simulation" class="form-control">
+                    <option value="all">All</option>
+                </select>
+            </div>
+            <div>
+                Stream Processor:
+                <select id="streamprocessor" class="form-control">
+                    <option value="all">All</option>
+                </select>
+            </div>
+        </td>
+        <td valign=top class="column2">
+            <div class="panel panel-info" data-collapsed="0">
+
+                <!-- panel body -->
+                <div class="panel-body">
+                    {% include 'reports/floating_window_report.html' %}
+                </div>
+            </div>
+        </td>
+    </table>
+</div>
+
+<script>
+    jQuery('#dialog').dialog({
+        position: sessionStorage.getItem('positionX') && sessionStorage.getItem('positionY') ? {my: "left top", at: `left+${sessionStorage.getItem('positionX')} top+${sessionStorage.getItem('positionY')}", of: "body`} : {my: "right bottom", at: "right+20 bottom-100", of: "body"},
+        width: sessionStorage.getItem('width') ? sessionStorage.getItem('width').slice(0,-2) : 1000,
+        height: sessionStorage.getItem('height') ? sessionStorage.getItem('height').slice(0,-2) : 400,
+        minHeight: 310,
+        minWidth: 900,
+        autoOpen: false,
+    });
+</script>

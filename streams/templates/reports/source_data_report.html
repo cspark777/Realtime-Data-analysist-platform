@@ -1,0 +1,56 @@
+<div id="source_data_card">
+    <div class="card-large__description">
+      <span class="description-main">Total Records In Set: {{ source_data_rows_count }}</span>
+    </div>
+
+    <div class="card-large__body">
+        <table id="monitor-source-data-table" class="display nowrap hover" style="width:100%">
+          <thead>
+            <tr>
+              {% for key in source_data_keys_monitor %}
+                <th>{{ key }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+        </table>
+    </div>
+</div>
+
+<script>
+$(document).ready(function () {
+    let analysisData;
+    let monitorSourceDataTable = $('#monitor-source-data-table');
+    let source_data_keys_monitor = {{ source_data_keys_monitor | safe  }};
+    let columns = source_data_keys_monitor.map(key => {
+      return {'data': key}
+    });
+
+    let extraParams = {% if extra_report_params %}{{ extra_report_params|safe }}{% else %}{}{% endif %};
+
+    monitorSourceDataTable.DataTable({
+      "ajax": {
+        "type": "GET",
+        "url": "{{ analysis_url }}",
+        "data": extraParams,
+        "dataSrc": function(d){
+            if(!d.data.length){
+                $('#source_data_card .card-large__body').remove();
+                $('#source_data_card .description-main').text('No events found');
+            }
+
+            analyseData = d.data;
+            analyseData.sort(function(a, b) {
+                return ((a['__time'] < b['__time']) ? -1 : ((a['__time'] === b['__time']) ? 0 : 1));
+            });
+
+            if(typeof analyse !== 'undefined')
+                analyse();
+
+            return d.data;
+         }
+      },
+      "columns": columns,
+      "order": [[ 0, 'desc' ]]
+    });
+}); 
+</script>

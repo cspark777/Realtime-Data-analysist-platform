@@ -1,0 +1,109 @@
+<div class="card-large__description">
+    <form autocomplete="off" method="POST">
+        {% csrf_token %}
+        <div>
+            Group By:
+            <select id="analyseFieldSelect" name="group_by_field" style="width: 20%; margin-left: 6px">
+                {% for inner_key in source_data_keys %}
+                    <option {% if inner_key == group_by_field %}selected{% endif %}>{{ inner_key }}</option>
+                {% endfor %}
+            </select>
+            <input type=submit style="width: 10%; margin-left: 6px">
+        </div>
+    </form>
+</div>
+
+<div style="display: flex">
+    <div id="analyseChartContainer"><canvas id="groupByChart" width="400" height="200"></canvas></div>
+    <div id="analyseStats"></div>
+</div>
+
+<script src="{% static 'searches/js/analyse/main.js' %}"></script>
+<script src="{% static 'searches/js/analyse/histogram.js' %}"></script>
+<script src="{% static 'searches/js/analyse/series.js' %}"></script>
+<script src="{% static 'searches/js/analyse/forecast.js' %}"></script>
+
+<script>
+    const METRICS = ['First', 'Last', 'Minimum', 'Maximum', 'Average'];
+
+    function analyse(analyseData) {
+        const fieldToAnalyse = $('#analyseFieldSelect').val();
+        const data = makeAnalyse(analyseData, fieldToAnalyse);
+
+        $('#analyseStats').empty();
+        for(let i=0; i<METRICS.length; i++){
+            if(data.stats[i] !== '-'){
+                $('#analyseStats').append(
+                    `<div class="stat-entry">
+                    <div class="stat-name">${METRICS[i]}</div>
+                    <div class="stat-value">${data.stats[i]}</div>
+                </div>`
+                );
+            }
+        }
+    }
+
+    function makeAnalyse(analyseData, column) {
+        const values = analyseData.map(a => a[column]);
+
+        const max = Math.max.apply(Math, values);
+        const min = Math.min.apply(Math, values);
+        const first = values[0];
+        const last = values[values.length-1];
+        const avg = values.reduce(( p, c ) => p + c, 0) / values.length;
+
+        return {
+            stats: [pretty(first), pretty(last), pretty(min), pretty(max), pretty(avg.toFixed(3))],
+        };
+    }
+
+    function pretty(value) {
+        if((typeof(value) !== 'string' && (isNaN(value) || !isFinite(value))) ||
+            typeof value === 'undefined' || value == 'NaN')
+            return '-';
+        return value;
+    }
+
+    const color = Chart.helpers.color;
+    const ctx = document.getElementById("groupByChart").getContext("2d");
+
+    ctx.canvas.width = $('.card-large').first().width()*0.8;
+    ctx.canvas.height = 400;
+
+    const options = {
+        responsive: false,
+        scales: {
+            xAxes: [{
+                ticks: {
+                    beginAtZero: true
+                }
+            }]
+        }
+    };
+
+    const horizontalBarChartData = {
+        labels: [],
+        datasets: [{
+            label: 'Dataset 1',
+            borderWidth: 1,
+            data: []
+        }]
+
+    };
+
+    {% for row in events_grouped_by_rows %}
+        console.log('{{ row.key }}');
+        horizontalBarChartData.labels.push('{{ row.key }}');
+    {% endfor %}
+
+    {% for row in events_grouped_by_rows %}
+        horizontalBarChartData.datasets[0].data.push({{ row.CNT }});
+    {% endfor %}
+
+    const cfg = {
+        type: 'horizontalBar',
+        data: horizontalBarChartData,
+        options: options
+    };
+    const myBarChart = new Chart(ctx, cfg);
+</script>

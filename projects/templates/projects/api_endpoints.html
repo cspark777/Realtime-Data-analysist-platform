@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% load static %}
+{% load compress %}
+
+{% block content %}
+    <h2 class="project-name">{{ current_project }}</h2>
+    <div class="apis__content_header">API Connection Details</div>
+
+    {% if project %}
+
+        <div class="apis__content_widget">
+            <div class="apis__content_widget_left">
+                <p>Your Developer Key:</p>
+                <div class="apis_enpoint_copy">
+                    <input id="api1" class="apis_enpoint_copy_input" value="{{ project.created_by.developer_key }}" readonly>
+                    <span>
+                        <button class="apis_enpoint_copy_button" type="button" data-clipboard-demo data-clipboard-target="#api1">
+                            <img src="{% static 'streamprocessors/images/copy.png' %}" alt="Copy to clipboard">
+                        </button>
+                    </span>
+
+                </div>
+            </div>
+            <div class="apis__content_widget_right">
+                Your developer key is used to access DATA via API and Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quis arcu a sapien rutrum scelerisque. Ut efficitur nisl vel dapibus luctus.
+            </div>
+        </div>
+
+        <div class="apis__content_widget">
+            <div class="apis__content_widget_left">
+                <p>This Product Key:</p>
+                <div class="apis_enpoint_copy">
+                    <input id="api2" class="apis_enpoint_copy_input" value="{{ project.project_key }}" readonly>
+                    <span>
+                        <button class="apis_enpoint_copy_button" type="button" data-clipboard-demo data-clipboard-target="#api2">
+                            <img src="{% static 'streamprocessors/images/copy.png' %}" alt="Copy to clipboard">
+                        </button>
+                    </span>
+
+                </div>
+            </div>
+            <div class="apis__content_widget_right">
+                The product key is used to access DATA via API and Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quis arcu a sapien rutrum scelerisque. Ut efficitur nisl vel dapibus luctus.
+            </div>
+        </div>
+
+        <div class="apis__content_widget">
+            <div class="apis__content_widget_left">
+                <p>Kafka API Endpoint:</p>
+                <div class="apis_enpoint_copy">
+<!--                    <input id="api3" class="apis_enpoint_copy_input" value="{{ project.kafka_url }}" readonly>-->
+                    <input id="api3" class="apis_enpoint_copy_input" value="{{ user.organisation.kafka_url_public }}" readonly>
+
+                    <span>
+                        <button class="apis_enpoint_copy_button" type="button" data-clipboard-demo data-clipboard-target="#api3">
+                            <img src="{% static 'streamprocessors/images/copy.png' %}" alt="Copy to clipboard">
+                        </button>
+                    </span>
+
+                </div>
+            </div>
+            <div class="apis__content_widget_right">
+                Kafak is used to access DATA via API and Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quis arcu a sapien rutrum scelerisque. Ut efficitur nisl vel dapibus luctus.
+            </div>
+        </div>
+
+        <div class="apis__content_widget">
+            <div class="apis__content_widget_left">
+                <p>Druid API Endpoint:</p>
+                <div class="apis_enpoint_copy">
+<!--                    <input id="api4" class="apis_enpoint_copy_input" value="{{ project.druid_url }}" readonly>-->
+                    <input id="api4" class="apis_enpoint_copy_input" value="{{ user.organisation.default_druid_url }}" readonly>
+                    <span>
+                        <button class="apis_enpoint_copy_button" type="button" data-clipboard-demo data-clipboard-target="#api4">
+                            <img src="{% static 'streamprocessors/images/copy.png' %}" alt="Copy to clipboard">
+                        </button>
+                    </span>
+
+                </div>
+            </div>
+            <div class="apis__content_widget_right">
+                Your database endpoint is used to access DATA via API and Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quis arcu a sapien rutrum scelerisque. Ut efficitur nisl vel dapibus luctus.
+            </div>
+        </div>
+
+        <div class="apis__content_widget">
+            <div class="apis__content_widget_left">
+                <p>Cluster Type</p>
+                <div class="apis_enpoint_copy">
+<!--                    <input id="api5" class="apis_enpoint_copy_input" value="{{ project.cluster_type }}" readonly>-->
+                    <input id="api5" class="apis_enpoint_copy_input" value="{{ user.organisation.default_cluster_type }}" readonly>
+                    <span>
+                        <button class="apis_enpoint_copy_button" type="button" data-clipboard-demo data-clipboard-target="#api5">
+                            <img src="{% static 'streamprocessors/images/copy.png' %}" alt="Copy to clipboard">
+                        </button>
+                    </span>
+
+                </div>
+            </div>
+            <div class="apis__content_widget_right">
+                Your cluster type is used to access DATA via API and Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quis arcu a sapien rutrum scelerisque. Ut efficitur nisl vel dapibus luctus.
+            </div>
+        </div>
+
+        <div class="apis__content_widget">
+            <div class="apis__content_widget_left">
+                <p>Cluster Endpoint:</p>
+                <div class="apis_enpoint_copy">
+<!--                    <input id="api6" class="apis_enpoint_copy_input" value="{{ project.cluster_endpoint }}" readonly>-->
+                    <input id="api6" class="apis_enpoint_copy_input" value="{{ user.organisation.default_cluster_endpoint }}" readonly>
+                    <span>
+                        <button class="apis_enpoint_copy_button" type="button" data-clipboard-demo data-clipboard-target="#api6">
+                            <img src="{% static 'streamprocessors/images/copy.png' %}" alt="Copy to clipboard">
+                        </button>
+                    </span>
+
+                </div>
+            </div>
+            <div class="apis__content_widget_right">
+                Your cluster endpoint is used to access DATA via API and Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent quis arcu a sapien rutrum scelerisque. Ut efficitur nisl vel dapibus luctus.
+            </div>
+        </div>
+    {% else %}
+        <div class="information">
+            <h2 class="information__header">Manage Projects</h2>
+            <h3>No projects are available.</h3>
+            <a class="btn" href="{% url 'projects:new_project' %}">Add New Project</a>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+    <script src="{% static 'streamprocessors/js/clipboard.min.js' %}"></script>
+    <script>
+
+        var clipboardDemos = new ClipboardJS('[data-clipboard-demo]');
+        clipboardDemos.on('success', function(e) {
+            e.clearSelection();
+            console.info('Action:', e.action);
+            console.info('Text:', e.text);
+            console.info('Trigger:', e.trigger);
+            showTooltip(e.trigger, 'Copied!');
+        });
+        clipboardDemos.on('error', function(e) {
+            console.error('Action:', e.action);
+            console.error('Trigger:', e.trigger);
+            showTooltip(e.trigger, fallbackMessage(e.action));
+        });
+
+        //var btns = document.querySelectorAll('.apis_enpoint_copy_button');
+<!--        for (var i = 0; i < btns.length; i++) {-->
+<!--            btns[i].addEventListener('mouseleave', clearTooltip);-->
+<!--            btns[i].addEventListener('blur', clearTooltip);-->
+<!--        }-->
+
+        function clearTooltip(e) {
+            e.currentTarget.setAttribute('class', 'apis_enpoint_copy_button');
+            e.currentTarget.removeAttribute('aria-label');
+        }
+
+        function showTooltip(elem, msg) {
+            elem.setAttribute('class', 'apis_enpoint_copy_button tooltipped tooltipped-s');
+            elem.setAttribute('aria-label', msg);
+        }
+
+        function fallbackMessage(action) {
+            var actionMsg = '';
+            var actionKey = (action === 'cut' ? 'X' : 'C');
+            if (/iPhone|iPad/i.test(navigator.userAgent)) {
+                actionMsg = 'No support :(';
+            } else if (/Mac/i.test(navigator.userAgent)) {
+                actionMsg = 'Press ⌘-' + actionKey + ' to ' + action;
+            } else {
+                actionMsg = 'Press Ctrl-' + actionKey + ' to ' + action;
+            }
+            return actionMsg;
+        }
+    </script>
+{% endblock %}

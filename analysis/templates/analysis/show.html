@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static %}
+{% load extras %}
+
+{% block content %}
+  <h1 class="new-item__header">Report - {{ report.name }}</h1>
+  <p>{{ report.description }}</p>
+
+  {% for report_item in report_items %}
+    {% if report_item in broken_reports %}
+      {% include 'reports/report_panel.html' with panel_title='Invalid Report' panel_body_template='reports/report_invalid.html' %}
+    {% else %}
+      {% if report_item.type == 'series_chart' %}
+        {% include 'reports/report_panel.html' with panel_title='Series Chart' panel_body_template='reports/chart_series.html' %}
+      {% endif %}
+
+      {% if report_item.type == 'histogram' %}
+        {% include 'reports/report_panel.html' with panel_title='Histogram' panel_body_template='reports/chart_histogram.html' %}
+      {% endif %}
+
+      {% if report_item.type == 'scatter_plot' %}
+        {% include 'reports/report_panel.html' with panel_title='X/Y Scatter Plot' panel_body_template='reports/chart_scatter.html' %}
+      {% endif %}
+
+      {% if report_item.type == 'data_table' %}
+        {% include 'reports/report_panel.html' with panel_title='Data Table' panel_body_template='reports/data_table.html' %}
+      {% endif %}
+
+      {% if report_item.type == 'summary' %}
+        {% include 'reports/report_panel.html' with panel_title='Summary' panel_body_template='reports/summary.html' %}
+      {% endif %}
+
+      {% if report_item.type == 'saved_search' %}
+        {% include 'reports/report_panel.html' with panel_title='Saved Search' panel_body_template='reports/saved_search.html' %}
+      {% endif %}
+
+      {% if report_item.type == 'bar_chart' %}
+        {% include 'reports/report_panel.html' with panel_title='Bar Chart' panel_body_template='reports/bar_chart.html' %}
+      {% endif %}
+
+      {% if report_item.type == 'metrics' %}
+        {% include 'reports/report_panel.html' with panel_title='Metrics' panel_body_template='reports/metrics.html' %}
+      {% endif %}
+
+      {% if report_item.type == 'external_source' %}
+        {% include 'reports/report_panel.html' with panel_title='External Source' panel_body_template='reports/external_source.html' %}
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+
+  {% if not report_items.exists %}
+    No report items
+  {% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="{% static 'streamprocessors/js/raphael-min.js' %}"></script>
+  <script src="{% static 'streamprocessors/js/morris.min.js' %}"></script>
+{% endblock %}

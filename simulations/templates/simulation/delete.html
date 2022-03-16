@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+    <main class="wrapper">
+        <div class="information">
+            <h3>Are you sure you want to delete<br>"{{ object }}"?</h3>
+            <form autocomplete="off" method="post">
+                {% csrf_token %}
+                <button class="btn" type="submit">Confirm</button>
+            </form>
+        </div>
+    </main>
+{% endblock %}

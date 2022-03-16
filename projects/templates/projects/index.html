@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    {% if project %}
+        <div class="stream-card__header">
+            <div>
+                <h2>{{ project.name }}</h2>
+                <span>{{ project.description }}</span>
+            </div>
+            <div>
+                <span>Owner: {{project.created_by.first_name }} {{project.created_by.last_name }}</span>
+                <div>
+                    <a class="card-action edit"
+                       href="{% url 'projects:edit_project' project_id=project.id %}">
+                        <span class="helper">Edit</span>
+                    </a>
+                    <a class="card-action duplicate"
+                       href="{% url 'projects:duplicate_project' project_id=project.id %}">
+                        <span class="helper">Duplicate</span>
+                    </a>
+                    <a class="card-action export"
+                       href="{% url 'projects:export_project' project_id=project.id %}">
+                        <span class="helper">Export</span>
+                    </a>
+                    <a class="card-action delete"
+                       href="{% url 'projects:delete_project' project_id=project.id %}">
+                        <span class="helper">Delete</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="stream-card__wrapper">
+            <a class="stream-card stream-card--1"
+               href="{% url 'projects:streams:index' project_id=current_project.id %}">
+                <span class="stream-card__val">{{ project.stream_set.count }}</span>
+                <span class="stream-card__text">Number of Streams</span>
+                <img src="{% static 'design/images/icon_number_of_streams.svg' %}" alt="number of streams">
+                <div class="stream-card__hover-bg" data-name="Number of Streams"></div>
+            </a>
+            <a class="stream-card stream-card--2"
+               href="{% url 'projects:streamprocessors:streamprocessors_list' project_id=current_project.id %}">
+                <span class="stream-card__val">{{ project.streamprocessor_set.count }}</span>
+                <span class="stream-card__text">Number of Stream Processors</span>
+                <img src="{% static 'design/images/icon_number_of_stream_processors.svg' %}"
+                     alt="number of streams">
+                <div class="stream-card__hover-bg" data-name="Number of Stream Processors"></div>
+            </a>
+            <a class="stream-card stream-card--3"
+               href="{% url 'projects:simulations:simulations_list' project_id=current_project.id %}">
+                <span class="stream-card__val">{{ project.simulation_set.count }}</span>
+                <span class="stream-card__text">Number of Simulations</span>
+                <img src="{% static 'design/images/icon_number_of_simulations.svg' %}" alt="number of streams">
+                <div class="stream-card__hover-bg" data-name="Number of Simulations"></div>
+            </a>
+            <a class="stream-card stream-card--4"
+               href="{% url 'projects:analysis:reports' project_id=current_project.id %}">
+                <span class="stream-card__val">{{ project.report_set.count }}</span>
+                <span class="stream-card__text">Number of Reports</span>
+                <img src="{% static 'design/images/icon_number_of_reports.svg' %}" alt="number of streams">
+                <div class="stream-card__hover-bg" data-name="Number of Reports"></div>
+            </a>
+
+            <a class="stream-card stream-card--5"
+               href="{% url 'projects:streamprocessors:streamprocessors_list' project_id=current_project.id %}">
+                <span class="stream-card__val">{{ project.streamprocessor_set.count }}</span>
+                <span class="stream-card__text">Running Stream Processor Instances</span>
+                <img src="{% static 'design/images/icon_running_stream_processors_instances.svg' %}"
+                     alt="number of streams">
+                <div class="stream-card__hover-bg" data-name="Running Stream Processor Instances"></div>
+            </a>
+            <a class="stream-card stream-card--6"
+               href="#">
+                <span class="stream-card__val">0</span>
+                <span class="stream-card__text">Messages Processed</span>
+                <img src="{% static 'design/images/icon_messages_processed.svg' %}" alt="number of streams">
+                <div class="stream-card__hover-bg" data-name="Messages Processed"></div>
+            </a>
+            <a class="stream-card stream-card--7"
+               href="#">
+                <span class="stream-card__val">0</span>
+                <span class="stream-card__text">Messages Published</span>
+                <img src="{% static 'design/images/icon_messages_published.svg' %}" alt="number of streams">
+                <div class="stream-card__hover-bg" data-name="Messages Published"></div>
+            </a>
+            <a class="stream-card stream-card--8"
+               href="{% url 'account:workflow-tasks' user_id=user.id %}">
+                <span class="stream-card__val">{{ workflow_tasks_count }}</span>
+                <span class="stream-card__text">Workflow Tasks</span>
+                <img src="{% static 'design/images/icon_workflow_tasks.svg' %}" alt="number of streams">
+                <div class="stream-card__hover-bg" data-name="Workflow Tasks"></div>
+            </a>
+        </div>
+    {% else %}
+        <div class="information">
+            <h2 class="information__header">Manage Projects</h2>
+            <h3>No projects are available.</h3>
+            <a class="btn" href="{% url 'projects:new_project' %}">Add New Project</a>
+        </div>
+    {% endif %}
+
+{% endblock %}

@@ -1,0 +1,47 @@
+{% load extras %}
+
+<div class="card-large__description">
+  <span class="description-main">{{ report_item.name }} - {{ report_item.get_time_window_display }}</span>
+  <span class="description-secondary">{{ report_item.description }}</span>
+</div>
+
+<div id="histogram_{{ report_item.id }}" style="height: 300px;"></div>
+
+<script>
+  (function ($) {
+
+    $(document).ready(function () {
+
+      Object.filter = (obj, allowedKeys) =>
+        Object.keys(obj).filter(key => allowedKeys.includes(key))
+          .reduce((res, key) => (res[key] = obj[key], res), {});
+
+      // Morris.js Graphs
+
+      var histogramOptions = {
+        element: 'histogram_{{ report_item.id }}',
+        axes: true,
+        data: [],
+        xkey: 'key',
+        ykeys: ['CNT'],
+        labels: ['{{ report_item.x_value }}'],
+        barColors: ['#803c8a']
+      };
+
+      {% for row in source_data|get_item:report_item.id %}
+        var reportItemHistogram = {{ row|safe }};
+        for (let [key, value] of Object.entries(reportItemHistogram)) {
+            if(reportItemHistogram[key] === ''){
+                reportItemHistogram[key] = null;
+            }
+        }
+        histogramOptions.data.push(Object.filter(reportItemHistogram, [...histogramOptions.ykeys, histogramOptions.xkey]));
+      {% endfor %}
+
+      if (typeof Morris != 'undefined') {
+          Morris.Bar(histogramOptions);
+      }
+    });
+
+  })(jQuery, window);
+</script>

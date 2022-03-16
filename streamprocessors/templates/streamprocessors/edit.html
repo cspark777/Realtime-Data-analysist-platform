@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% load extras %}
+{% load static %}
+{% block content %}
+
+    <style>
+        th:nth-child(1) {
+            width: 32%
+        }
+
+        th:nth-child(2) {
+            width: 48%
+        }
+
+        th:nth-child(3) {
+            width: 20%
+        }
+
+        .sub-selects {
+            border: 2px solid grey;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .sub-selects > *:last-child {
+            margin-bottom: 0;
+        }
+
+    </style>
+    <h2 class="project-name">{{ current_project }}</h2>
+    <h2 class="dashboard__header">Edit Stream Processor</h2>
+    <form autocomplete="off" method="post">
+        <div id="invalid_form" hidden></div>
+        {% csrf_token %}
+        <div class="new-item__title">
+            {% for field in form %}
+                {% if field.label == 'Additional Integrity Checks' %}
+                    &nbsp;
+                    <!-- <input type="checkbox"
+                     name="additional_integrity_checks"
+                     id="id_additional_integrity_checks"
+                     data-toggle="popover"
+                     data-trigger="hover"
+                     data-placement="right"
+                     data-content="Performs additional integrity check at the expense of speed"
+                     data-original-title="Integrity checks"
+                     onchange="additionalIntegrityChanged(this)"
+                     {% if streamprocessor.additional_integrity_checks %}checked{% endif %}
+                     value="{{ streamprocessor.additional_integrity_checks }}"
+              /> -->
+                {% else %}
+                    {{ field }}
+                {% endif %}
+                {% if field.help_text %}
+                    <span class="card__field">{{ field.help_text }}</span>
+                {% endif %}
+                {% for error in field.errors %}
+                    <span class="card__field card__field--red">{{ error }}</span>
+                {% endfor %}
+            {% endfor %}
+        </div>
+        <div class="new-item__body">
+            {% if steps.exists %}
+                {% for step in steps %}
+                    {% if not step.is_child_node %}
+                        {% include 'streamprocessors/step_edit.html' %}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </div>
+        <div id="add-item-button-group" style="text-align: right; margin-top: 40px">
+            <div class="btn btn--step" id="add-step">New step</div>
+        </div>
+        <div class="new-item__footer">
+            <button class="btn" type="submit" id="submit">Submit</button>
+        </div>
+        <div class="deleted_steps"></div>
+        <div class="deleted_blocks"></div>
+    </form>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        var DATA = {{ step_types_data | safe}};
+        var KPI_CATEGORIES = {{ kpi_categories | safe }};
+        var CATEGORY_METRICS = {{ category_metrics | safe }};
+        var KPI_ACTION_CHOICES = {{ kpi_action_choices | safe }};
+        var KPI_MEASUREMENT_CHOICES = {{ kpi_measurement_choices | safe }};
+        var TOPICS = {{ topics | safe }};
+        var SCHEMAS_FIELDS = {{ schemas_fields | safe }};
+        var FUNCTIONS = {{ functions | safe }};
+        var FUNCTION_ENDPOINTS = {{ function_endpoints | safe }};
+        var STEP_TYPES = {{ step_types | safe }};
+        var RECIPIENTS = {{ recipients | safe }};
+        var DATA_DICTIONARIES = {{ data_dictionaries | safe }};
+        var SCHEMAS = {{ schemas | safe }};
+        var SEARCHES = {{ searches | safe }};
+        const HEADERS = {'X-CSRFToken': $("input[name='csrfmiddlewaretoken']").val()};
+
+        $('#submit').click(function (e) {
+            e.preventDefault();
+            var data = new FormData;
+            var inputs = $('input, select, textarea');
+            inputs.each(function () {
+                var value = $(this).val(),
+                    name = $(this).attr('name');
+                data.append(name, value);
+            });
+
+            jQuery.ajax({
+                url: '{% url 'projects:streamprocessors:edit' project_id=current_project.id streamprocessor_id=streamprocessor.id %}',
+                type: "POST",
+                headers: HEADERS,
+                data: data,
+                processData: false,
+                contentType: false,
+                success: function () {
+                    window.location = "/react" + '{% url 'projects:streamprocessors:streamprocessors_list' project_id=current_project.id %}';
+                },
+                error: function (response) {
+                    if (response.responseJSON && response.responseJSON.error) {
+                        $('#invalid_form').empty();
+                        $.each(response.responseJSON.error, function (key, value) {
+                            for (let j in value) {
+                                $('#invalid_form').append(`<span class="card__field card__field--red">${key.charAt(0).toUpperCase() + key.slice(1,)}: ${value[j]}</span>`);
+                            }
+                        });
+                        $('#invalid_form').show();
+                    } else {
+                        $('#invalid_form').empty();
+                        $('#invalid_form').hide();
+                    }
+                }
+            });
+
+        });
+
+        {#$("input#id_name").on({#}
+        {#    keydown: function(e) {#}
+        {#        if (e.which === 32)#}
+        {#            return false;#}
+        {#    },#}
+        {#    change: function() {#}
+        {#        this.value = this.value.replace(/\s/g, "");#}
+        {#    }});#}
+
+    </script>
+    <script src="{% static 'streamprocessors/js/edit.js' %}"></script>
+{% endblock %}

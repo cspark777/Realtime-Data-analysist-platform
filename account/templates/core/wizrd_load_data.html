@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load extras %}
+{% load static %}
+
+{% block content %}
+
+    <script type="text/javascript">
+        function popup() {
+            document.getElementById('welcome').innerHTML = 'Добро пожаловать!';
+        }
+        const arr = [{time:'234234'},{}]
+    </script>
+    <script>
+        function uploadFile(e) {
+
+            const selectedFile = document.getElementById('load-data').files[0];
+
+        }
+    </script>
+    <div style="align-items: center; display: flex;flex-direction: column;height: 100%">
+        <img class="logo-image" src="{% static 'design/images/load-data-step.svg' %}" width="100" height="30"
+             alt="current step">
+        <h2 style=" font-family: Helvetica Neue, sans-serif;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 30px;
+  line-height: 37px;
+  color: #803C8A;
+  text-align: center;
+  margin-bottom: 20px;">Import Data</h2>
+        <span style="color: #4F4F4F">
+            Select Files
+        </span>
+        <div style="
+        padding-top: 80px;
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
+        height: 300px;
+        align-items: center;
+            ">
+            <div>
+                <img class="logo-image" src="{% static 'design/images/load-data-img.svg' %}" width="150" height="150"
+                     alt="current step">
+            </div>
+
+            <div style="width: 250px; display: flex; flex-direction: column" class="btn">
+                <span style="">Import Data</span>
+                <input onchange="uploadFile(this)"
+                       style="opacity: 0; position: absolute; width: 245px;height: 45px"
+                       type="file"
+                       id="load-data"
+                >
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}
+

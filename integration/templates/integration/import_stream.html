@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load extras %}
+{% load static %}
+{% block content %}
+    {% csrf_token %}
+    <div id="loader"></div>
+    <div class="container">
+        <img class="logo-image" src="{% static 'design/images/load-data-step-4.svg' %}" width="100" height="30"
+             alt="current step">
+        <h2 class="titleWizard">Import Data</h2>
+        <span class="textSelect">
+                Confirm And Load
+            </span>
+    </div>
+    <div style="padding-top: 30px; width:100%;justify-content: center;display: flex">
+        <span style="font-size: 14px; font-weight: bold">Destination Stream</span>
+    </div>
+    <div class="container" style="padding-top: 30px">
+        <div class="styled-select" style="display: flex;align-items: center">
+            <select class="step" style="width: 800px">
+                {% for stream in streams %}
+                    <option id="optionStream" value={{ stream.name }}>
+                        {{ stream.display_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div onclick="nextStep()" style="display: flex; justify-content: center">
+        <div style="margin-top:40px; width:300px;"
+             id="buttonImportData"
+             class="btn">
+            <span style="">Confirm input of {{ counter }} records</span>
+        </div>
+    </div>
+
+    </div>
+    <script type="text/javascript">
+        const counter = {{counter | safe}};
+        const HEADERS = {'X-CSRFToken': $("input[name='csrfmiddlewaretoken']").val()};
+
+
+        function nextStep() {
+            const selectedFile = document.getElementById('optionStream').value;
+            let formData = new FormData();
+            formData.append("stream_name", selectedFile);
+            document.getElementById("loader").innerHTML = `<div class="loader"><div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div>`
+            fetch('{% url 'projects:integration:stream_upload' project_id=current_project.id %}', {
+                method: "POST",
+                body: formData,
+                headers: HEADERS,
+            }).then(response => {
+                if (response.status === 200) {
+                    window.location.href = '{% url 'projects:current_project'%}';
+                } else {
+                    alert('sorry... file not support')
+                }
+            })
+        }
+    </script>
+
+{% endblock %}

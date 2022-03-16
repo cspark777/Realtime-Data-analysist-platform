@@ -1,0 +1,31 @@
+{% load extras %}
+
+<div class="row">
+  <div class="col-sm-12">
+    <table id="reports-summary">
+      <thead>
+        <tr>
+          <th colspan=4 class="text-center">
+            {{ report_item.record_type }} - {{report_item.x_value}} ({{ report_item.get_time_window_display }})
+          </th>
+        </tr>
+        <tr id="summaryHeaders">
+          <th>Min value</th>
+          <th>Max value</th>
+          <th>Average</th>
+          <th>Total entries</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr id="summaryValues">
+          {% with data=source_data|get_item:report_item.id %}
+          <td>{{ data.0.min_val }}</td>
+          <td>{{ data.0.max_val }}</td>
+          <td>{{ data.0.avg_val }}</td>
+          <td>{{ data.0.total }}</td>
+          {% endwith %}
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

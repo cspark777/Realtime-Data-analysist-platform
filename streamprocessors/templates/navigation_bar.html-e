@@ -1,0 +1,580 @@
+{% load static %}
+
+<header>
+    <div class="header__top">
+        <nav class="main-nav">
+            <ul>
+                {% if user.is_authenticated %}
+                    {% if current_project %}
+
+                        <li class="main-nav__item">
+                            <a class="main-nav__link" href="#">
+                                <span>
+                                    <img src="{% static 'design/images/main-nav/menu_icon_project.svg' %}"
+                                         alt="Project">
+                                </span>Project</a>
+                            <div class="submenu__wrapper">
+                                <ul class="submenu">
+                                    <li class="submenu__item">
+                                        <a class="submenu__link"
+                                           href="{% if current_project.id %}
+                                                    {% url 'projects:projects_details' project_id=current_project.id %}
+                                                 {% endif %}">
+                                            Details</a>
+                                        <a class="submenu__link"
+                                           href="{% if current_project.id %}
+                                                    {% url 'projects:collaboration:collaboration_list' project_id=current_project.id %}
+                                                 {% endif %}">
+                                            Collaborators</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+
+                        <li class="main-nav__item">
+                            <a class="main-nav__link" href="#">
+                                <span>
+                                    <img src="{% static 'design/images/main-nav/menu_icon_data.svg' %}"
+                                         alt="Data">
+                                </span>Data</a>
+                            <div class="submenu__wrapper">
+                                <ul class="submenu">
+                                    <li class="submenu__item">
+                                        <a class="submenu__link"
+                                            href="{% if current_project %}
+                                                {% url 'projects:searches:search' project_id=current_project.id %}
+                                                {% endif %}">
+                                            Search</a>
+                                        <a class="submenu__link"
+                                            href="{% if current_project.id %}
+                                                    {% url 'projects:integration:data_source_import' project_id=current_project.id %}
+                                                  {% endif %}">
+                                            Import</a>
+                                        <a class="submenu__link"
+                                            href="{% if current_project %}
+                                                {% url 'projects:searches:extract' project_id=current_project.id %}
+                                            {% endif %}">
+                                            Extract</a>
+                                        <li class="submenu__item">
+                                                <a class="submenu__link"
+                                                   href="{% if current_project %}
+                                                            {% url 'projects:simulations:simulations_list' project_id=current_project.id %}
+                                                         {% endif %}">
+                                                    Simulate</a>
+                                            </li>
+                                        <a class="submenu__link"
+                                            href="{% if current_project.id %}
+                                                    {% url 'projects:integration:data_source_list' project_id=current_project.id %}
+                                                  {% endif %}">
+                                            DATA Connector</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+
+                        {% if user.role == "developer" %}
+                            <li class="main-nav__item">
+                                <a class="main-nav__link" href="#">
+                                <span>
+                                    <img src="{% static 'design/images/main-nav/menu_icon_manage.svg' %}" alt="Manage">
+                                </span>Manage</a>
+                                <div class="submenu__wrapper">
+                                    <ul class="submenu">
+                                        <li class="submenu__item">
+                                            <a class="submenu__link"
+                                               href="{% if current_project %}
+                                                        {% url 'projects:schemas:schemas_list' project_id=current_project.id %}
+                                                     {% endif %}">
+                                                Event Definitions</a>
+                                        </li>
+                                        <li class="submenu__item">
+                                            <a class="submenu__link"
+                                               href="{% if current_project %}
+                                                        {% url 'projects:streams:index' project_id=current_project.id %}
+                                                     {% endif %}">
+                                                Event Streams</a>
+                                        </li>
+                                        <li class="submenu__item">
+                                            <a class="submenu__link"
+                                               href="{% if current_project %}
+                                                        {% url 'projects:streamprocessors:streamprocessors_list' project_id=current_project.id %}
+                                                     {% endif %}">
+                                                Stream Processors</a>
+                                        </li>
+                                        <li class="submenu__item">
+                                            <a class="submenu__link"
+                                               href="{% if current_project %}
+                                                        {% url 'projects:searches:index' project_id=current_project.id %}
+                                                     {% endif %}">
+                                                Saved Searches</a>
+                                        </li>
+                                        <li class="submenu__item">
+                                            <a class="submenu__link"
+                                               href="{% if current_project %}
+                                                        {% url 'projects:streamprocessors:kpis:kpi_list' project_id=current_project.id %}
+                                                     {% endif %}">
+                                                Metrics & KPIs</a>
+                                        </li>
+                                        <li class="submenu__item">
+                                            <a class="submenu__link"
+                                               href="{% if current_project %}
+                                                        {% url 'projects:functions:functions_list' project_id=current_project.id %}
+                                                     {% endif %}">
+                                                Functions</a>
+                                        </li>
+                                        <li class="submenu__item">
+                                            <a class="submenu__link"
+                                               href="{% if current_project %}
+                                                        {% url 'projects:analysis:reports' project_id=current_project.id %}
+                                                     {% endif %}">
+                                                Reports</a>
+                                        </li>
+
+                                        <li class="submenu__item">
+                                            <a class="submenu__link"
+                                               href="{% if current_project %}
+                                                        {% url 'projects:timelines:index' project_id=current_project.id %}
+                                                     {% endif %}">
+                                                Timelines</a>
+                                        </li>
+                                        <li class="submenu__item">
+                                            <a class="submenu__link"
+                                               href="{% if current_project %}
+                                                        {% url 'projects:datadictionaries:datadictionaries_list' project_id=current_project.id %}
+                                                     {% endif %}">
+                                                Data Dictionaries</a>
+                                        </li>
+                                      
+                                    </ul>
+                                </div>
+                            </li>
+                        {% endif %}
+                    {% endif %}
+
+                    <li class="main-nav__item">
+                        <a href="{% url 'account:login' %}">
+                            <img class="logo-image"
+                                 src="{% static 'design/images/logo.svg' %}" width="120" height="56" alt="DATA">
+                        </a>
+                    </li>
+
+                    {% if current_project %}
+                        <li class="main-nav__item">
+                            <a class="main-nav__link" href="#">
+                                <span>
+                                    <img src="{% static 'design/images/main-nav/menu_icon_reporting.svg' %}"
+                                         alt="Reporting">
+                                </span>Reporting</a>
+                            <div class="submenu__wrapper">
+                                <ul class="submenu">
+                                    <li class="submenu__item">
+                                        <a class="submenu__link"
+                                           href="{% if current_project %}
+                                                    {% url 'projects:analysis:reports_readonly' project_id=current_project.id %}
+                                                 {% endif %}">
+                                            Reports</a>
+                                    </li>
+                                    <li class="submenu__item">
+                                        <a class="submenu__link"
+                                           href="{% if current_project %}
+                                                    {% url 'projects:streamprocessors:kpis:current' project_id=current_project.id %}
+                                                 {% endif %}">
+                                            Metrics & KPIs</a>
+                                    </li>
+                                    <li class="submenu__item">
+                                        <a class="submenu__link"
+                                           href="{% if current_project %}
+                                                    {% url 'projects:searches:index_readonly' project_id=current_project.id %}
+                                                 {% endif %}">
+                                            Searches</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+
+                        <li class="main-nav__item">
+                            <a class="main-nav__link" href="#">
+                                 <span>
+                                    <img src="{% static 'design/images/main-nav/menu_icon_workflow.svg' %}"
+                                         alt="Workflow">
+                                </span>Workflow</a>
+                            <div class="submenu__wrapper">
+                                <ul class="submenu">
+                                    <li class="submenu__item">
+                                        <a class="submenu__link"
+                                           href="{% url 'account:workflow-tasks' user_id=user.id %}">
+                                            Inbox</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+
+                        <li class="main-nav__item">
+                            <a class="main-nav__link" href="#">
+                                <span>
+                                    <img src="{% static 'design/images/main-nav/menu_icon_help.svg' %}"
+                                         alt="Help">
+                                </span>Help</a>
+                            <div class="submenu__wrapper">
+                                <ul class="submenu">
+                                    <li class="submenu__item">
+                                        <a class="submenu__link" href="{% url 'help' %}">Guides</a>
+                                        <a class="submenu__link" href="http://DATA.systems/DATA-labs-new" target="_blank">DATA Labs</a>
+                                        <a class="submenu__link" href="http://DATA.systems/"  target="_blank">DATA Homepage</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+
+                    {% endif %}
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    <div class="header__bottom">
+        {% if user.is_authenticated %}
+            <div class="user">
+                <img class="user__avatar" src="{% static 'design/images/submenu/menu_avatar.svg' %}" alt="avatar">
+                <a class="user__email" href="{% url 'account:edit' pk=user.id %}">{{ user }}</a>
+            </div>
+            <nav class="second-nav">
+                <ul>
+                    {% if current_project %}
+                        <li class="second-nav__item">
+                            <a class="second-nav__link"
+                                    {# href="{% if current_project.stream_set.exists %}{% url 'projects:streams:logs' project_id=current_project.id %}{% endif %}">#}
+                               href="{% url 'projects:streamprocessors:all-logs' project_id=current_project.id %}">
+                                All Logs</a>
+                        </li>
+
+                    {% endif %}
+                    <li class="second-nav__item">
+                        <a class="second-nav__link" href="PIVOT_URL_PLACEHOLDER" target="_blank">Pivot Reporting</a>
+                    </li>
+                    <li class="second-nav__item">
+                        <a class="second-nav__link" href="SUPERSET_URL_PLACEHOLDER" target="_blank">Superset
+                            Reporting</a>
+                    </li>
+                    {% if current_project %}
+                        <nav class="main-nav">
+                            <li class="main-nav__item">
+                                <a class="second-nav__link" href="#">Developer Key</a>
+                                <div class="submenu__wrapper" style="width:420px">
+                                    <ul class="submenu">
+                                        <li class="submenu__item">
+                                            <a class="submenu__link">{{ user.developer_key }}</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                        </nav>
+                    {% endif %}
+                    <nav class="main-nav">
+                        <li class="main-nav__item">
+                            <a class="second-nav__link" href="#">Druid Console</a>
+                            <div class="submenu__wrapper">
+                                <ul class="submenu">
+                                    <li class="submenu__item">
+                                        <a class="submenu__link"
+                                           href="http://34.247.56.206:8888" target="_blank">Druid Console</a>
+                                    </li>
+                                    <li class="submenu__item">
+                                        <a class="submenu__link"
+                                           href="http://34.247.56.206:8888" target="_blank">Druid API Endpoint</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                    </nav>
+                    <nav class="main-nav">
+                        <li class="main-nav__item">
+                            <a class="second-nav__link" href="#">Kafka URL</a>
+                            <div class="submenu__wrapper" style="width:390px">
+                                <ul class="submenu">
+                                    <li class="submenu__item">
+                                        <a class="submenu__link">KAFKA_URL_PLACEHOLDER</a>
+                                    </li>
+                                    <!-- <li class="submenu__item">
+                                        <a class="submenu__link">Username: KAFKA_USERNAME</a>
+                                    </li>
+                                    <li class="submenu__item">
+                                        <a class="submenu__link">Password: KAFKA_PASSWORD</a>
+                                    </li> -->
+                                </ul>
+                            </div>
+                        </li>
+                    </nav>
+                </ul>
+            </nav>
+            <div class="logout-wrapper">
+                <a href="{% url 'account:logout' %}" onclick="logout()">
+                    <button class="logout-btn" type="button">
+                        <img src="{% static 'design/images/submenu/menu_icon_logout.svg' %}"
+                             alt="exit icon" width="15" height="15">
+                        Logout
+                    </button>
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</header>
+<script>
+    function logout() {
+        localStorage.clear()
+    }
+</script>
+
+{# ----------------------------- OLD ----------------------------- #}
+
+{#<header class="navbar navbar-fixed-top">#}
+{#    <!-- set fixed position by adding class "navbar-fixed-top" -->#}
+{##}
+{#    <div class="navbar-inner">#}
+{#        <!-- logo -->#}
+{#        {% if user.is_authenticated %}#}
+{#            <div class="navbar-brand" style="padding-left:15px;padding-top:10px">#}
+{#                <a href="{% url 'account:login' %}">#}
+{#                    <img src="{% static 'streamprocessors/images/DATAlogo_writing.png' %}" width="120" alt=""/>#}
+{#                </a>#}
+{#            </div>#}
+{#        {% endif %}#}
+{#        <!-- main menu -->#}
+{#        <ul class="opened active navbar-nav">#}
+{#            {% if user.is_authenticated %}#}
+{#                {% if current_project %}#}
+{#                    <li class="has-sub">#}
+{#                        <a href="#">#}
+{#                            <i class="entypo-layout"></i>#}
+{#                            <span class="title">Project</span>#}
+{#                        </a>#}
+{#                        <ul class="visible">#}
+{#                            <li>#}
+{#                                <a href="#}
+{##}
+{##}
+{##}
+{#                                        {% if current_project.id %}{% url 'projects:projects_details' project_id=current_project.id %}{% endif %}">#}
+{#                                    <span class="title">Details</span>#}
+{#                                </a>#}
+{#                            </li>#}
+{#                        </ul>#}
+{#                    </li>#}
+{##}
+{#                    {% if user.role == "developer" %}#}
+{#                        <li class="has-sub">#}
+{#                            <a href="#">#}
+{#                                <i class="entypo-layout"></i>#}
+{#                                <span class="title">Manage</span>#}
+{#                            </a>#}
+{#                            <ul class="visible">#}
+{#                                <li>#}
+{#                                    <a href="#}
+{#                                            {% if current_project %}{% url 'projects:streams:index' project_id=current_project.id %}{% endif %}">#}
+{#                                        <span class="title">Manage Streams</span>#}
+{#                                    </a>#}
+{#                                </li>#}
+{#                                <li>#}
+{#                                    <a href="#}
+{##}
+{##}
+{##}
+{#                                            {% if current_project %}{% url 'projects:schemas:schemas_list' project_id=current_project.id %}{% endif %}">#}
+{#                                        <span class="title">Manage Schemas</span>#}
+{#                                    </a>#}
+{#                                </li>#}
+{#                                <li>#}
+{#                                    <a href="#}
+{##}
+{##}
+{##}
+{#                                            {% if current_project %}{% url 'projects:streamprocessors:streamprocessors_list' project_id=current_project.id %}{% endif %}">#}
+{#                                        <span class="title">Manage Processors</span>#}
+{#                                    </a>#}
+{#                                </li>#}
+
+{#                                <li>#}
+{#                                    <a href="#}
+{##}
+{##}
+{##}
+{#                                            {% if current_project %}{% url 'projects:simulations:simulations_list' project_id=current_project.id %}{% endif %}">#}
+{#                                        <span class="title">Manage Simulations</span>#}
+{#                                    </a>#}
+{#                                </li>#}
+{#                                <li>#}
+{#                                    <a href="#}
+{##}
+{##}
+{##}
+{#                                            {% if current_project %}{% url 'projects:streamprocessors:kpis:kpi_list' project_id=current_project.id %}{% endif %}">#}
+{#                                        <span class="title">Manage KPIs</span>#}
+{#                                    </a>#}
+{#                                </li>#}
+{#                                <li>#}
+{#                                    <a href="#}
+{##}
+{##}
+{##}
+{#                                            {% if current_project %}{% url 'projects:timelines:index' project_id=current_project.id %}{% endif %}">#}
+{#                                        <span class="title">Manage Timelines</span>#}
+{#                                    </a>#}
+{#                                </li>#}
+{#                                <li>#}
+{#                                    <a href="#}
+{##}
+{##}
+{##}
+{#                                            {% if current_project %}{% url 'projects:datadictionaries:datadictionaries_list' project_id=current_project.id %}{% endif %}">#}
+{#                                        <span class="title">Manage Data Mappings</span>#}
+{#                                    </a>#}
+{#                                </li>#}
+{#                            </ul>#}
+{#                        </li>#}
+{#                    {% endif %}#}
+{##}
+{#                    <li class="has-sub">#}
+{#                        <a href="#">#}
+{#                            <i class="entypo-newspaper"></i>#}
+{#                            <span class="title">Reporting</span>#}
+{#                        </a>#}
+{#                        <ul>#}
+{#                            <li>#}
+{#                                <a href="#}
+{##}
+{##}
+{##}
+{#                                        {% if current_project %}{% url 'projects:analysis:reports' project_id=current_project.id %}{% endif %}">#}
+{#                                    <span class="title">Reports</span>#}
+{#                                </a>#}
+{#                            </li>#}
+{#                            <li>#}
+{#                                <a href="#}
+{##}
+{##}
+{##}
+{#                                        {% if current_project %}{% url 'projects:streamprocessors:kpis:current' project_id=current_project.id %}{% endif %}">#}
+{#                                    <span class="title">Key Performance Indicators</span>#}
+{#                                </a>#}
+{#                            </li>#}
+{##}
+{#                        </ul>#}
+{#                    </li>#}
+{##}
+{#                    <li class="has-sub">#}
+{#                        <a href="#">#}
+{#                            <i class="entypo-newspaper"></i>#}
+{#                            <span class="title">Workflow</span>#}
+{#                        </a>#}
+{#                        <ul>#}
+{#                            <li>#}
+{#                                <a href="{% url 'account:workflow-tasks' user_id=user.id %}">#}
+{#                                    <span class="title">Inbox</span>#}
+{#                                </a>#}
+{#                            </li>#}
+{#                        </ul>#}
+{#                    </li>#}
+{#                {% endif %}#}
+{#            {% endif %}#}
+{#        </ul>#}
+{##}
+{#        <!-- notifications and other links -->#}
+{#        <ul class="nav navbar-right pull-right">#}
+{#            {% if user.is_authenticated %}#}
+{#                {% if current_project %}#}
+{#                    <li class="dropdown">#}
+{#                        <a href="" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"#}
+{#                           data-close-others="true">#}
+{#                            <i class="entypo-mail"></i>#}
+{#                            <span class="badge badge-secondary">{{ high_log_number }}</span>#}
+{#                        </a>#}
+{#                        <ul class="dropdown-menu">#}
+{#                            <li>#}
+{#                                <ul class="dropdown-menu-list scroller">#}
+{#                                    {% for item in high_logs %}#}
+{#                                        <li class="active">#}
+{#                                            <a href="#">#}
+{#                                        <span class="line">#}
+{#                                            <strong>{{ item.date|date:"M d Y - HH:i:s" }}</strong>#}
+{#                                        </span>#}
+{#                                                <span class="line">#}
+{#                                            <strong>{{ item.component }}</strong> - {{ item.streamprocessor }}#}
+{#                                        </span>#}
+{#                                                <span class="line">#}
+{#                                            <i>{{ item.sub_component }}</i>#}
+{#                                        </span>#}
+{#                                                <span class="line desc small">#}
+{#                                            {{ item.message }}#}
+{#                                        </span>#}
+{#                                            </a>#}
+{#                                        </li>#}
+{#                                    {% endfor %}#}
+{#                                </ul>#}
+{#                            </li>#}
+{##}
+{#                            <li class="external">#}
+{#                                <a href="#}
+{##}
+{##}
+{##}
+{#                                        {% if current_project.stream_set.exists %}{% url 'projects:streams:logs' project_id=current_project.id %}{% endif %}">All#}
+{#                                    Logs</a>#}
+{#                            </li>#}
+{#                        </ul>#}
+{#                    </li>#}
+{#                    <li class="sep"></li>#}
+{#                    <li class="has-sub root-level">#}
+{#                    <li>#}
+{#                        <a href="#" id="developer-key">#}
+{#                            <span>Developer Key</span>#}
+{#                        </a>#}
+{#                    </li>#}
+{#                    </li>#}
+{##}
+{#                    <li class="sep"></li>#}
+{#                {% endif %}#}
+{##}
+{#                <li class="dropdown">#}
+{#                <li>#}
+{#                    <a href="http://34.247.56.206:8888" target="_blank">Druid Console</a>#}
+{#                </li>#}
+{#                </li>#}
+{##}
+{#                <li class="sep"></li>#}
+{##}
+{#                <li class="dropdown">#}
+{#                <li>#}
+{#                    <a href="PIVOT_URL_PLACEHOLDER" target="_blank">Pivot Reporting</a>#}
+{#                </li>#}
+{#                </li>#}
+{##}
+{#                <li class="sep"></li>#}
+{##}
+{#                <!-- <li class="dropdown">#}
+{#                    <li>#}
+{#                        <a href="ELK_URL_PLACEHOLDER">Kibana Logging</a>#}
+{#                    </li>#}
+{#                </li> -->#}
+{##}
+{#                <li class="sep"></li>#}
+{##}
+{##}
+{#                <li class="dropdown">#}
+{#                <li>#}
+{#                    <a href="{% url 'account:edit' pk=user.id %}">Logged In As [{{ user }}]</a>#}
+{#                </li>#}
+{#                </li>#}
+{##}
+{#                <li class="sep"></li>#}
+{##}
+{#                <li>#}
+{#                    <a href="{% url 'account:logout' %}">#}
+{##}
+{#                        Log Out <i class="entypo-logout right"></i>#}
+{#                    </a>#}
+{#                </li>#}
+{#            {% endif %}#}
+{#        </ul>#}
+{##}
+{#    </div>#}
+{##}
+{#</header>#}

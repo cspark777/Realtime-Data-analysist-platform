@@ -1,0 +1,58 @@
+{% load extras %}
+
+<div class="card-large__description">
+  <span class="description-main">{{ report_item.name }} - {{ report_item.get_time_window_display }}</span>
+  <span class="description-secondary">{{ report_item.description }}</span>
+</div>
+
+<canvas id="scatterPlot_{{ report_item.id }}" width="800" height="300"></canvas>
+
+<script>
+    let data = []
+    let dataItem;
+    {% for row in source_data|get_item:report_item.id %}
+      var row = {{ row|safe }};
+      dataItem =  {x: row['{{ report_item.x_value }}'], y: row['{{ report_item.y_value }}'], 'aaa': 'bbb'};
+      if(dataItem.x && dataItem.y){
+          data.push(dataItem);
+      }
+    {% endfor %}
+
+    var scatterPlot = document.getElementById("scatterPlot_{{ report_item.id }}");
+    var ctx = scatterPlot.getContext("2d");
+
+    ctx.canvas.width = 800;
+    ctx.canvas.height = 300;
+
+    var scatterChart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Scatter Dataset',
+                data: data
+            }]
+        },
+        options: {
+            scales: {
+                xAxes: [
+                    {
+                        type: 'linear',
+                        position: 'bottom',
+                        scaleLabel: {
+                            display: true,
+                            labelString: '{{ report_item.x_value }}'
+                        }
+                    }
+                ],
+                yAxes: [
+                    {
+                        scaleLabel: {
+                            display: true,
+                            labelString: '{{ report_item.y_value }}'
+                        }
+                    }
+                ]
+            }
+        }
+    });
+</script>

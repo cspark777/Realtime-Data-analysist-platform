@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load static %}
+{% load extras %}
+{% block content %}
+
+    <h1>View logs - {{ streamprocessor }}</h1>
+
+
+    {% if source_data_rows %}
+
+        {% include 'reports/source_data_report.html' %}
+
+    {% endif %}
+
+    {% if not source_data_rows %}
+        No view logs
+    {% endif %}
+
+{% endblock %}

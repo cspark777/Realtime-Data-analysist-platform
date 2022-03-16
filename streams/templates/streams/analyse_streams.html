@@ -1,0 +1,27 @@
+{% extends "streams/logs.html" %}
+{% load static %}
+
+{% block analyse %}
+    {% include 'searches/analyse.html' %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'searches/js/analyse/main.js' %}"></script>
+<script src="{% static 'searches/js/analyse/histogram.js' %}"></script>
+<script src="{% static 'searches/js/analyse/series.js' %}"></script>
+<script src="{% static 'searches/js/analyse/forecast.js' %}"></script>
+
+<script>
+    const card = $('#analyseCard');
+    const METRICS = ['First', 'Last', 'Minimum', 'Maximum', 'Average'];
+    card.on('change', '#analyseFieldSelect', analyse);
+    card.on('change', '#analyseRowCountSelect', analyse);
+    card.on('change', '#analyseTypeSelect', analyseTypeChanged);
+    card.on('change', '#granularitySelect', analyse);
+
+    analyseFields = {{ source_data_keys_monitor | safe  }}.slice(1);
+    $('#analyseFieldSelect').html(
+        analyseFields.map(field => `<option value="${field}">${field}</option>`).join('')
+    );
+</script>
+{% endblock %}

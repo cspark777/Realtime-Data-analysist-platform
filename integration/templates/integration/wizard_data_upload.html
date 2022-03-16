@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load extras %}
+{% load static %}
+
+{% block content %}
+    {% csrf_token %}
+
+    <div class="container">
+        <div id="loader"></div>
+        <img class="logo-image" src="{% static 'design/images/load-data-step.svg' %}" width="100" height="30"
+             alt="current step">
+        <h2 class="titleWizard">Import Data</h2>
+        <span class="textSelect">
+            Select Files
+        </span>
+        <div class="blockImportData">
+            <div>
+                <img class="logo-image" src="{% static 'design/images/load-data-img.svg' %}" width="150" height="150"
+                     alt="current step">
+            </div>
+
+            <div id="buttonImportData" class="btn">
+                <span style="">Import Data</span>
+                <input onchange="uploadFile(this)"
+                       class="selectFile"
+                       type="file"
+                       id="load-data"
+                />
+            </div>
+        </div>
+
+    </div>
+    <script>
+        const HEADERS = {'X-CSRFToken': $("input[name='csrfmiddlewaretoken']").val()};
+    </script>
+    <script type="text/javascript">
+
+        function uploadFile(e) {
+            const selectedFile = document.getElementById('load-data').files[0];
+            let formData = new FormData();
+            formData.append("file", selectedFile);
+            document.getElementById("loader").innerHTML = `<div class="loader"><div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></div>`
+            fetch('{% url 'projects:integration:file_upload' project_id=current_project.id %}', {
+                method: "POST",
+                body: formData,
+                headers: HEADERS,
+            }).then(response => {
+                if (response.status === 200) {
+                    window.location.href = '{% url 'projects:integration:data_table_import' project_id=current_project.id %}';
+                } else {
+                    alert('sorry... file not support')
+                }
+            })
+        }
+    </script>
+{% endblock %}
+

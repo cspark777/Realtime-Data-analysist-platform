@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="project-name">{{ current_project }}</h2>
+            <h2 class="dashboard__header">Review Metrics & Key Performance Indicators</h2>
+            {% if counters %}
+                <h1 class="new-item__header">Counters</h1>
+                <table class="table-styled" id="data-table">
+                    <tbody>
+                    <tr>
+                        <th>Category Name</th>
+                        <th>Metric</th>
+                        <th>Slicing</th>
+                        <th>KPI Value</th>
+                        <th>Last Minute</th>
+                        <th>Last 10 Mins</th>
+                        <th>Last 30 Mins</th>
+                        <th>Last 1 Hour</th>
+{#                      <th>Last 12 Hrs</th> #}
+                        <th>Last 24 Hrs</th>
+                        <th>Last Week</th>
+                        <th>Last Month</th>
+                        <th>Last Year</th>
+                        <th>Actions</th>
+                    </tr>
+
+                    {% for kpi in counters %}
+                        <tr>
+                            <td>{{ kpi.category_name }}</td>
+                            <td>{{ kpi.metric }}</td>
+                            <td>
+                                {% if kpi.slice_field and kpi.slice_field != 'null' %}
+                                    <b>{{ kpi.slice_field }}</b><br>
+                                    {{ kpi.slice_value }}
+                                {% endif %}
+                            </td>
+                            <td><b>{{ kpi.kpi_value }}</b></td>
+                            <td>{{ kpi.kpi_value_last_minute_counter }}</td>
+                            <td>{{ kpi.kpi_value_last_ten_minutes_counter }}</td>
+                            <td>{{ kpi.kpi_value_last_thirty_minutes_counter }}</td>
+                            <td>{{ kpi.kpi_value_last_hour_counter }}</td>
+{#                          <td>{{ kpi.kpi_value_last_twelve_hours }}</td> #}
+                            <td>{{ kpi.kpi_value_last_day_counter }}</td>
+                            <td>{{ kpi.kpi_value_last_week_counter }}</td>
+                            <td>{{ kpi.kpi_value_last_thirty_days_counter }}</td>
+                            <td>{{ kpi.kpi_value_last_year_counter }}</td>
+                            <td>
+                                <a href="{% url 'projects:streamprocessors:kpis:monitor_kpi_counter' project_id=project_id KPI_id=kpi.kpi_id %}{% if kpi.slice_field and kpi.slice_value %}?slice_field={{ kpi.slice_field }}&slice_value={{ kpi.slice_value }}{% endif %}" class="card-action monitor">
+                                    <span class="helper">Monitor KPI</span>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+            {% if measurements %}
+                <h1 class="new-item__header" style="margin-top: 70px">Measurements</h1>
+                <table class="table-styled" id="data-table">
+                    <tbody>
+                    <tr>
+                        <th>Category Name</th>
+                        <th>Metric</th>
+                        <th>Slicing</th>
+                        <th>KPI Value</th>
+                        <th>Last Minute</th>
+                        <th>Last 10 Mins</th>
+                        <th>Last 30 Mins</th>
+                        <th>Last 1 Hour</th>
+{#                        <th>Last 12 Hrs</th> #}
+                        <th>Last 24 Hrs</th>
+                        <th>Last Week</th>
+                        <th>Last Month</th>
+                        <th>Last Year</th>
+                        <th>Actions</th>
+                    </tr>
+                    {% for kpi in measurements %}
+                        <tr>
+                            <td>{{ kpi.category_name }}</td>
+                            <td>{{ kpi.metric }}</td>
+                            <td>
+                                {% if kpi.slice_field and kpi.slice_field != 'null' %}
+                                    <b>{{ kpi.slice_field }}</b><br>
+                                    {{ kpi.slice_value }}
+                                {% endif %}
+                            </td>
+                            <td><b>{{ kpi.last_kpi_value }}</b></td>
+                            <td>
+                                {% if kpi.last_kpi_value_last_minute is not None %}
+                                    Last: {{ kpi.last_kpi_value_last_minute }}<br>
+                                    Max: {{ kpi.max_kpi_value_last_minute }}<br>
+                                    Min:{{ kpi.min_kpi_value_last_minute }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if kpi.last_kpi_value_last_ten_minutes is not None %}
+                                    Last: {{ kpi.last_kpi_value_last_ten_minutes }}<br>
+                                    Max: {{ kpi.max_kpi_value_last_ten_minutes }}<br>
+                                    Min:{{ kpi.min_kpi_value_last_ten_minutes }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if kpi.last_kpi_value_last_thirty_minutes is not None %}
+                                    Last: {{ kpi.last_kpi_value_last_thirty_minutes }}<br>
+                                    Max: {{ kpi.max_kpi_value_last_thirty_minutes }}<br>
+                                    Min:{{ kpi.min_kpi_value_last_thirty_minutes }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if kpi.last_kpi_value_last_hour is not None %}
+                                    Last: {{ kpi.last_kpi_value_last_hour }}<br>
+                                    Max: {{ kpi.max_kpi_value_last_hour }}<br>
+                                    Min:{{ kpi.min_kpi_value_last_hour }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if kpi.last_kpi_value_last_day is not None %}
+                                    Last: {{ kpi.last_kpi_value_last_day }}<br>
+                                    Max: {{ kpi.max_kpi_value_last_day }}<br>
+                                    Min:{{ kpi.min_kpi_value_last_day }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if kpi.last_kpi_value_last_week is not None %}
+                                    Last: {{ kpi.last_kpi_value_last_week }}<br>
+                                    Max: {{ kpi.max_kpi_value_last_week }}<br>
+                                    Min:{{ kpi.min_kpi_value_last_week }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if kpi.last_kpi_value_last_thirty_days is not None %}
+                                    Last: {{ kpi.last_kpi_value_last_thirty_days }}<br>
+                                    Max: {{ kpi.max_kpi_value_last_thirty_days }}<br>
+                                    Min:{{ kpi.min_kpi_value_last_thirty_days }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if kpi.last_kpi_value_last_year is not None %}
+                                    Last: {{ kpi.last_kpi_value_last_year }}<br>
+                                    Max: {{ kpi.max_kpi_value_last_year }}<br>
+                                    Min:{{ kpi.min_kpi_value_last_year }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'projects:streamprocessors:kpis:monitor_kpi_measurement' project_id=project_id KPI_id=kpi.kpi_id %}{% if kpi.slice_field and kpi.slice_value %}?slice_field={{ kpi.slice_field }}&slice_value={{ kpi.slice_value }}{% endif %}" class="card-action monitor">
+                                    <span class="helper">Monitor KPI</span>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+            {% if not counters and not measurements %}
+                <div class="empty">
+                    <span class="empty__text">No KPIs are available.</span>
+                    <img src="{% static 'design/images/empty-kpi.svg' %}"
+                         width="155"
+                         height="134"
+                         alt="no data"
+                         class="empty__image"
+                    >
+                </div>
+            {% endif %}
+
+            {% if is_paginated %}
+                <div>
+            <span>
+                {% if page_obj.has_previous %}
+                    <a class="btn btn-default" href="?page=1">&laquo; First</a>
+                    <a class="btn btn-default" href="?page={{ previous_page_number }}">Previous</a>
+                {% endif %}
+
+                <span class="btn btn-default" style="opacity: 1; pointer-events: none;">
+                    Page {{ page_obj.number }} of {{ paginator.num_pages }}.
+                </span>
+
+                {% if page_obj.has_next %}
+                    <a class="btn btn-default" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    <a class="btn btn-default" href="?page={{ paginator.num_pages }}">Last &raquo;</a>
+                {% endif %}
+            </span>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

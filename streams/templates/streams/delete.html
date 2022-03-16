@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="information">
+        <h3>Are you sure you want to delete<br>"{{ object }}"?</h3>
+        <form autocomplete="off" method="post">
+            {% csrf_token %}
+            {% if error %}
+                <span class="card__field card__field--red" data-header="Status">{{ error }}</span>
+                <a class="btn" href="{% url 'projects:streams:index' project_id=current_project.id %}">
+                    Confirm
+                </a>
+            {% else %}
+                <button class="btn" type="submit">Confirm</button>
+            {% endif %}
+        </form>
+    </div>
+{% endblock %}

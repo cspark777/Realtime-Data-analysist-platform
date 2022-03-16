@@ -1,0 +1,56 @@
+{% load extras %}
+
+<div class="card-large__description">
+  <span class="description-main">{{ report_item.name }} - {{ report_item.get_time_window_display }}</span>
+  <span class="description-secondary">{{ report_item.description }}</span>
+</div>
+
+<div id="series_chart_{{ report_item.id }}" style="height: 300px;"></div>
+
+<script>
+  (function ($) {
+
+    $(document).ready(function () {
+
+      Object.filter = (obj, allowedKeys) =>
+        Object.keys(obj).filter(key => allowedKeys.includes(key))
+          .reduce((res, key) => (res[key] = obj[key], res), {});
+
+      // Morris.js Graphs
+
+        var seriesChartOptions = {
+          element: 'series_chart_{{ report_item.id }}',
+          data: [],
+          {% if report_item.plot_type == 'value_from_report' %}
+            xkey: '_0',
+            ykeys: ['{{ report_item.y_value }}'],
+            labels: ['{{ report_item.y_value }}'],
+          {% else %}
+            xkey: 'tm',
+            ykeys: ['CNT'],
+            labels: ['Event Count'],
+          {% endif %}
+          parseTime: false,
+          lineColors: ['#803c8a'],
+          smooth: false
+        };
+
+
+      {% for row in source_data|get_item:report_item.id %}
+        var reportItemSeriesChart = {{ row|safe }};
+        for (let [key, value] of Object.entries(reportItemSeriesChart)) {
+            if(reportItemSeriesChart[key] === ''){
+                reportItemSeriesChart[key] = null;
+            }
+        }
+
+        seriesChartOptions.data.push(Object.filter(reportItemSeriesChart, [...seriesChartOptions.ykeys, seriesChartOptions.xkey]));
+      {% endfor %}
+
+      if (typeof Morris != 'undefined') {
+          Morris.Line(seriesChartOptions);
+      }
+    });
+
+  })(jQuery, window);
+</script>

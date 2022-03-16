@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load static %}
+{% load extras %}
+
+{% block content %}
+    <style>
+        #search-item-table th:nth-child(1) { width: 20% }
+        #search-item-table th:nth-child(2) { width: 22% }
+        #search-item-table th:nth-child(3) { width: 35% }
+        #preview-table th:nth-child(1) { width: 22% }
+        .new-item__actions { justify-content: start }
+        .new-item__actions button:not(:nth-child(2)) { margin-left: 5px;}
+    </style>
+
+    <h2 class="project-name">{{ current_project }}</h2>
+    <h2 class="dashboard__header">
+    {% if page == 'create' %}
+        New Search
+    {% elif page == 'search' %}
+        Search
+    {% else %}
+        Extract
+    {% endif %}
+    </h2>
+    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+    <form autocomplete="off" method="POST" class="form-horizontal form-groups-bordered">
+        {% if page == 'create' %}
+            <div class="row" id="search-table">
+                {% csrf_token %}
+                <div class="new-item__title">
+                    {{ form.name }}
+                    {{ form.description }}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if form.errors %}
+            <p class="alert alert-danger">{{ form.errors }}</p>
+        {% endif %}
+
+        <div class="new-item__body">
+            <table class="new-item__step arrow-connected" id="search-item-table">
+                <tbody>
+                <tr>
+                    <th>Stream</th>
+                    <th>Query Parameters</th>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="styled-select">
+                            <select name="stream" id="id_stream" onchange="searchStreamChanged(this)">
+                                {% for stream in stream_names %}
+                                    <option value="{{ stream.name }}">
+                                            {{ stream.display_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </td>
+                    <td>
+                        {{ form.time_window }}
+
+                        <div id="searchFieldsContainer">
+                            {% for schema_field in init_fields %}
+                                <input type="text" name="{{schema_field}}" placeholder="{{ schema_field }}"/>
+                            {% endfor %}
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            {% include 'searches/results.html' %}
+        </div>
+    </form>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        let SCHEMA_FIELDS = {{ schema_fields|safe }};
+        let STREAMS = {{ stream_names|safe }};
+        let SEARCH_URL = "{% url 'projects:streamprocessors:source_events' project_id=current_project.id object_id=0 %}";
+        let FORECAST_URL = "{% url 'projects:searches:forecast' project_id=current_project.id %}";
+    </script>
+    <script src="{% static 'searches/js/analyse/main.js' %}"></script>
+    <script src="{% static 'searches/js/analyse/histogram.js' %}"></script>
+    <script src="{% static 'searches/js/analyse/series.js' %}"></script>
+    <script src="{% static 'searches/js/analyse/forecast.js' %}"></script>
+    <script src="{% static 'searches/js/edit.js' %}"></script>
+{% endblock %}

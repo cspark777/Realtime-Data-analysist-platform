@@ -1,0 +1,62 @@
+<div class="row">
+  <div class="col-sm-12">
+    <div class="card-large__description">
+      <span class="description-main">Total Records In Set: {{ kpi_data_rows_count }}</span>
+    </div>
+
+    <table id="monitor-source-data-table" class="display" style="width:100%">
+      <thead>
+        <tr>
+          {% for key in kpi_data_keys_monitor %}
+            <th>{{ key }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+    </table>
+  </div>
+</div>
+
+<script>
+$(document).ready(function () {
+    var monitorSourceDataTable = $('#monitor-source-data-table');
+    var kpi_data_keys_monitor = {{ kpi_data_keys_monitor | safe  }};
+    var titles = {
+        '__time': 'Time',
+        'category_name': 'Category',
+        'kpi_value': {% if kpi.indicator_type == 'kpi_type_counter' %}'KPI Increment'{% else %}'KPI Value'{% endif %},
+        'metric': 'Metric',
+        'slice_field': 'Slice Field',
+        'slice_value': 'Slice Value',
+    };
+
+    var columns = kpi_data_keys_monitor.map(key => {
+      let title = titles[key] || key;
+      return {'data': key, 'title': title}
+    });
+
+    monitorSourceDataTable.DataTable({
+      "ajax": {
+        "type": "GET",
+        "url": "{{ analysis_url }}",
+        "dataSrc": function (json) {
+          let data = json.data;
+          for (let i=0; i<data.length; i++ ) {
+            let dt = new Date(data[i]['__time']);
+
+            data[i]['__time'] = `${
+                (dt.getMonth()+1).toString().padStart(2, '0')}/${
+                dt.getDate().toString().padStart(2, '0')}/${
+                dt.getFullYear().toString().padStart(4, '0')} ${
+                dt.getHours().toString().padStart(2, '0')}:${
+                dt.getMinutes().toString().padStart(2, '0')}:${
+                dt.getSeconds().toString().padStart(2, '0')}`;
+            }
+
+          return data;
+        }
+      },
+      "columns": columns,
+      "order": [[ 0, 'desc' ]],
+    });
+});
+</script>

@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-md-12">
+      <h2 class="project-name">{{ current_project }}</h2>
+      <h2 class="dashboard__header">Manage Data Dictionaries</h2>
+      {% if datadictionaries %}
+        <table class="table-styled" id="table-1">
+          <tbody>
+          <tr>
+            <th>Data Dictionary Name</th>
+            <th style="width: 50%">Description</th>
+            <th style="width: 14%">Actions</th>
+          </tr>
+
+          {% for datadictionary in datadictionaries %}
+            <tr>
+              <td><a href="{% url 'projects:datadictionaries:datadictionary_edit'  project_id=current_project.id datadictionary_id=datadictionary.id %}">{{ datadictionary.name }}</a></td>
+              <td>{{ datadictionary.description }}</td>
+              <td>
+                <a href="{% url 'projects:datadictionaries:datadictionary_edit'  project_id=current_project.id datadictionary_id=datadictionary.id %}"
+                   class="card-action edit">
+                   <span class="helper">Edit</span>
+                </a>
+
+                <a href="{% url 'projects:datadictionaries:datadictionary_duplicate'  project_id=current_project.id datadictionary_id=datadictionary.id %}"
+                   class="card-action duplicate">
+                   <span class="helper">Duplicate</span>
+                </a>
+
+                <a href="{% url 'projects:datadictionaries:datadictionary_delete'  project_id=current_project.id datadictionary_id=datadictionary.id %}"
+                   class="card-action delete">
+                   <span class="helper">Delete</span>
+                </a>
+
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty">
+            <span class="empty__text">No data dictionaties are available.</span>
+            <img src="{% static 'design/images/icon_data_dictionaries.svg' %}"
+                 width="155" height="134" alt="no data" class="empty__image">
+             
+        </div>
+    {% endif %}
+
+      {% if is_paginated %}
+        <div>
+          <span>
+              {% if page_obj.has_previous %}
+                <a class="btn btn-default" href="?page=1">&laquo; First</a>
+                <a class="btn btn-default" href="?page={{ previous_page_number }}">Previous</a>
+              {% endif %}
+
+            <span class="btn btn-default" style="opacity: 1; pointer-events: none;">
+                  Page {{ page_obj.number }} of {{ paginator.num_pages }}.
+              </span>
+
+            {% if page_obj.has_next %}
+              <a class="btn btn-default" href="?page={{ page_obj.next_page_number }}">Next</a>
+              <a class="btn btn-default" href="?page={{ paginator.num_pages }}">Last &raquo;</a>
+            {% endif %}
+          </span>
+        </div>
+      {% endif %}
+
+      <div class="dashboard__footer">
+        <a href="{% url 'projects:datadictionaries:datadictionaries_new' project_id=current_project.id %}" class="btn">
+          Add Data Dictionary
+        </a>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    
+        <h2 class="project-name">{{ current_project }}</h2>
+        <h2 class="dashboard__header">Edit Metric / Performance Indicator</h2>
+
+        <form autocomplete="off" method="post">
+            <div class="new-item new-item--simulation wrapper">
+                <div class="new-item__title">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        {% if field.name == 'indicator_type' %}
+                            <div class="styled-select new-item__replicas">{{ field }}</div>
+                        {% else %}
+                            {{ field }}
+                        {% endif %}
+
+                        {% if field.help_text %}
+                            <span class="card__field">{{ field.help_text }}</span>
+                        {% endif %}
+                        {% for error in field.errors %}
+                            <span class="card__field card__field--red">{{ error }}</span>
+                        {% endfor %}
+                    {% endfor %}
+                    {% if form.errors.exception %}
+                        <span class="card__field card__field--red">{{ form.errors.exception }}</span>
+                    {% endif %}
+                </div>
+                <div class="new-item__footer">
+                    <button class="btn" type="submit" id="submit">Submit</button>
+                </div>
+            </div>
+        </form>
+    
+{% endblock %}
+

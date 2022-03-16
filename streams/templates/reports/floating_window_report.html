@@ -1,0 +1,104 @@
+<div class="row">
+  <div class="col-sm-12">
+    <table id="floating-window-source-data" class="display" style="width:100%">
+      <thead>
+        <tr id="log_header">
+        </tr>
+      </thead>
+    </table>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function () {
+    let floatingWindowSourceData = $('#floating-window-source-data');
+    if (floatingWindowSourceData.length) {
+      jQuery.ajax({
+          url: '{% url 'projects:streamprocessors:get_logs_headers' project_id=current_project.id %}',
+          type: "GET",
+          async: false,
+          success: function (response) {
+            let project_select = response.projects.map(function (obj) {
+                return `<option value=${ obj.id }>${ obj.name }</option>`
+            }).join("\n");
+            $('#project').append(project_select);
+            let processor_select = response.processors.map(function (obj) {
+                return `<option value=${ obj.id }>${ obj.name }</option>`
+            }).join("\n");
+            $('#streamprocessor').append(processor_select);
+            let simulation_select = response.simulations.map(function (obj) {
+                return `<option value=${ obj.id }>${ obj.name }</option>`
+            }).join("\n");
+            $('#simulation').append(simulation_select);
+          }
+      });
+      let data = {'project': $('#project').val(), 'processor': $('#streamprocessor').val(), 'priority': $('#priority').val(), 'simulation': $('#simulation').val()};
+      let columns = [{"data": "__time", "width": "10%", "title": "Date"}, {"data": "component", "width": "10%", "title": "Component"}, {"data": "message", "width": "70%", "title": "Message"},
+            {"data": "project_id", "width": "5%", "className": "dt-center", "title": "Project"}, {"data": "streamprocessor_id", "width": "5%", "className": "dt-center", "title": "Streamprocessor"}];
+      floatingWindowSourceData.DataTable({
+        "ajax": {
+          "type": "GET",
+          "url": '{% url "projects:streamprocessors:get_logs_rows" project_id=current_project.id%}',
+          "data": data
+        },
+        "columns": columns,
+        "order": [[ 0, "desc" ]],
+        "dom": 'rt<"bottom"lfip>'
+      });
+      if (sessionStorage.getItem("open") === "true") {
+        $('#logs_button').text('Hide Logs');
+        $('#dialog').dialog('open');
+        asyncF();
+      } else {
+        $('#logs_button').text('Show Logs');
+      }
+      $('#logs_button').on('click', function() {
+        if ($('#dialog').is(":hidden")) {
+          $('#dialog').dialog('open');
+          $('#logs_button').text('Hide Logs');
+          sessionStorage.setItem("open", "true");
+          asyncF();
+        } else {
+          $('#dialog').dialog('close');
+          $('#logs_button').text('Show Logs');
+          sessionStorage.setItem("open", "false");
+        }
+      });
+      $('#all-logs').on('click', function() {
+        if ($('#dialog').is(":hidden")) {
+          $('#dialog').dialog('open');
+          $('#logs_button').text('Hide Logs');
+          sessionStorage.setItem("open", "true");
+          asyncF();
+        }
+      });
+      $('.ui-dialog-titlebar-close').on('click', function () {
+        $('#logs_button').text('Show Logs');
+        sessionStorage.setItem("open", "false");
+      });
+      $('#dialog').on('dialogresize', function(event) {
+        sessionStorage.setItem('width', event.target.style.width);
+        sessionStorage.setItem('height', event.target.style.height);
+      });
+      $('#dialog').on("dialogdrag", function(event) {
+          sessionStorage.setItem('positionX', $('.ui-dialog')[0].style.left);
+          sessionStorage.setItem('positionY', $('.ui-dialog')[0].style.top);
+      });
+    }
+  });
+
+  const asyncDelay = ms => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  };
+  const asyncF = async () => {
+      if ($('#dialog').is(":hidden")) return null;
+      let floatingWindowSourceData = $('#floating-window-source-data');
+      let data = {'project': $('#project').val(), 'processor': $('#streamprocessor').val(), 'priority': $('#priority').val(), 'simulation': $('#simulation').val()};
+      const r = await jQuery.ajax({url: '{% url "projects:streamprocessors:get_logs_rows" project_id=current_project.id%}', data: data});
+      floatingWindowSourceData.DataTable().clear();
+      floatingWindowSourceData.DataTable().rows.add(r.data);
+      floatingWindowSourceData.DataTable().draw(false);
+      await asyncDelay(3000);
+      return asyncF();
+  };
+</script>

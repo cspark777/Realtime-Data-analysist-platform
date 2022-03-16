@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <h2 class="project-name">{{ current_project }}</h2>
+  <h2 class="dashboard__header">New Data Dictionary</h2>
+
+  <form autocomplete="off" method="post">
+    <div class="row" id="simulation-table">
+      {% csrf_token %}
+      <div class="new-item__title" id="simulation-table">
+        <div id="invalid_form" hidden></div>
+        {% for field in form %}
+          {{ field }}
+          {% if field.help_text %}
+            <small class="text-primary">{{ field.help_text }}</small>
+          {% endif %}
+          {% for error in field.errors %}
+            <p class="alert alert-danger">{{ error }}</p>
+          {% endfor %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="new-item__body">
+      <div id="add-item-button-group" style="text-align: right; margin-top: 40px">
+        <button class="btn btn--step" id="add-item">New value</button>
+      </div>
+    </div>
+
+    <div class="new-item__footer" style="margin-bottom: 30px">
+      <button class="btn" type="submit" id="submit" disabled>Submit</button>
+    </div>
+  </form>
+{#  <div id="loading-div">Loading...</div>#}
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="{% static 'datadictionaries/js/edit.js' %}"></script>
+  <script src="{% static 'simulations/js/loading.js' %}"></script>
+  <script>
+    const HEADERS = {'X-CSRFToken': $("input[name='csrfmiddlewaretoken']").val()};
+
+    submitButton.click(function (e) {
+      e.preventDefault();
+      var data = new FormData;
+      var inputs = $('input, select, textarea');
+
+      inputs.each(function () {
+        var value = $(this).val(),
+          name = $(this).attr('name');
+        if ($(this).attr('type') === 'file') {
+          data.append(name, this.files[0])
+        } else {
+          data.append(name, value);
+        }
+      });
+
+      jQuery.ajax({
+        url: '{% url 'projects:datadictionaries:datadictionaries_new' project_id=current_project.id %}',
+        type: "POST",
+        headers: HEADERS,
+        data: data,
+        processData: false,
+        contentType: false,
+        success: function () {
+          window.location = '{% url 'projects:datadictionaries:datadictionaries_list' project_id=current_project.id %}';
+        },
+        error: function (response) {
+          if (response.responseJSON && response.responseJSON.error) {
+              $('#invalid_form').empty();
+            $.each(response.responseJSON.error, function (key, value) {
+              for (let j in value) {
+                $('#invalid_form').append(`<p class="alert alert-danger" id="invalid_form">${key.charAt(0).toUpperCase() + key.slice(1,)}: ${value[j]}</p>`);
+              }
+            });
+            $('#invalid_form').show();
+          } else {
+            $('#invalid_form').empty();
+            $('#invalid_form').hide();
+          }
+        }
+      });
+
+    });
+
+    var $loading = $('#loading-div').hide();
+    $(document)
+      .ajaxStart(function () {
+        $loading.show();
+      })
+      .ajaxStop(function () {
+        $loading.hide();
+      });
+
+  </script>
+{% endblock %}

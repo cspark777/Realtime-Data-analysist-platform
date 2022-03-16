@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+    <h2 class="project-name">{{ current_project }}</h2>
+    <h2 class="dashboard__header">Edit Stream</h2>
+
+    <div class="new-item new-item--simulation wrapper">
+        <form autocomplete="off" method="post">
+            {% csrf_token %}
+            <div class="new-item__title">
+                {% for field in form %}
+                    {% if field.auto_id == 'id_is_countable' %}
+                        <!-- <label for="id_is_countable" class="checkbox-container" style="grid-area: 3/1/4/4;">
+                            Archive The Stream For Later Analysis
+                            {{ field }}
+                            <span class="checkmark"></span>
+                        </label> -->
+                    {% elif field.name == 'share' %}
+                        <label for="id_share" class="checkbox-container" style="grid-area: 3/7/3/13;">
+                            Share This Stream With Other Members Of My Organisation
+                            {{ field }}
+                            <span class="checkmark"></span>
+                        </label>
+                    {% else %}
+                        {% if field.name == 'schema' %}
+                            <div class="styled-select new-item__replicas">
+                                {{ field }}
+                            </div>
+                        {% else %}
+                            {{ field }}
+                        {% endif %}
+                    {% endif %}
+                    <br><br>
+                    {% if field.help_text %}
+                        <span class="card__field">{{ field.help_text }}</span>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <span class="card__field card__field--red">{{ error }}</span>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+            <div class="new-item__footer">
+                <button class="btn">
+                    Submit
+                </button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

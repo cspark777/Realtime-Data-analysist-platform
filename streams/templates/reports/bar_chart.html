@@ -1,0 +1,45 @@
+{% load extras %}
+
+<div class="card-large__description">
+  <span class="description-main">{{ report_item.name }} - {{ report_item.get_time_window_display }}</span>
+  <span class="description-secondary">{{ report_item.description }}</span>
+</div>
+
+<div id="bar_chart_{{ report_item.id }}" style="height: 300px;"></div>
+
+<script>
+  (function ($) {
+    $(document).ready(function () {
+
+      Object.filter = (obj, allowedKeys) =>
+        Object.keys(obj).filter(key => allowedKeys.includes(key))
+          .reduce((res, key) => (res[key] = obj[key], res), {});
+
+      // Morris.js Graphs
+
+      let barChartOptions = {
+        element: 'bar_chart_{{ report_item.id }}',
+        axes: true,
+        data: [],
+        xkey: 'key',
+        ykeys: ['CNT'],
+        labels: ['{{ report_item.x_value }}'],
+        barColors: ['#803c8a']
+      };
+
+      {% for row in source_data|get_item:report_item.id %}
+        let reportItemBarChart = {{ row|safe }};
+        for (let [key, value] of Object.entries(reportItemBarChart)) {
+            if(reportItemBarChart[key] === ''){
+                reportItemBarChart[key] = null;
+            }
+        }
+        barChartOptions.data.push(Object.filter(reportItemBarChart, [...barChartOptions.ykeys, barChartOptions.xkey]));
+      {% endfor %}
+
+      if (typeof Morris != 'undefined') {
+          Morris.Bar(barChartOptions);
+      }
+    });
+  })(jQuery, window);
+</script>

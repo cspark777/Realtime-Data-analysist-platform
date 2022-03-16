@@ -1,0 +1,37 @@
+<div class="arrow-connected">
+    <button class="btn" id="preview">
+        {% if page == 'create' %}
+            Preview
+        {% else %}
+            Search
+        {% endif %}
+    </button>
+</div>
+
+<div id="results-card" class="arrow-connected" style="display: none">
+    <div class="card-large" data-collapsed="0">
+        <h2 class="card-large__header">Search Results</h2>
+        <div id="previewCardBody" class="card-large__body" style="text-align: left">
+            <div class="card-large__description">
+                <span class="description-main">Results</span>
+            </div>
+            <div class="card-large__body"></div>
+        </div>
+    </div>
+</div>
+
+<div id="analyseBtnContainer" class="arrow-connected" style="margin-top: -35px; display: none">
+    <button class="btn" id="analyse">Analyse</button>
+</div>
+
+{% include 'searches/analyse.html' with hidden=True %}
+
+{% if page == 'create' or page == 'edit' %}
+    <div id="submitContainer" class="arrow-connected" style="margin-top: -35px; display: none">
+        <button class="btn" type="submit" id="submit">Submit</button>
+    </div>
+{% elif page == 'extract' %}
+    <div id="downloadBtnContainer" class="arrow-connected" style="margin-top: -35px; margin-bottom: 30px; text-align: center; display: none">
+        <button class="btn" onclick="getResultsJson(event)">Download</button>
+    </div>
+{% endif %}

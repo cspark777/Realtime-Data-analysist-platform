@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+    <h2 class="project-name">{{ current_project }}</h2>
+    <h2 class="dashboard__header">Monitor Stream - {{ stream_name }}</h2>
+
+    {% if source_data_keys %}
+        {% include 'reports/options.html' %}
+
+        <div class="arrow-connected">
+            <div class="card-large" data-collapsed="0" style="margin-bottom: 0">
+                <h2 class="card-large__header">Source Data</h2>
+                <div class="card-large__body">
+                    {% include 'reports/source_data_report.html' %}
+                </div>
+            </div>
+        </div>
+        {% block analyse %}
+        {% endblock %}
+    {% else %}
+        <div class="empty">
+            <span class="empty__text">The stream has no events</span>
+            <img src="{% static 'design/images/empty-timelines.svg' %}" width="120" height="134" alt="no data" class="empty__image">
+        </div>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+    <h2 class="project-name">{{ current_project }}</h2>
+    <h2 class="dashboard__header">All Logs</h2>
+
+    <div class="logs__aside">
+        <div>
+            <label for="component">Component</label>
+            <div class="styled-select styled-select--color-gray">
+                <select id="component">
+                    <option value="all">All</option>
+                    <option value="Simulator Runner">Simulator Runner</option>
+                    <option value="Stream Processor Runner">Stream Processor Runner</option>
+                    <option value="DATA Server">DATA Server</option>
+                </select>
+            </div>
+        </div>
+        <div>
+            <label for="priority">Priority</label>
+            <div class="styled-select styled-select--color-gray">
+                <select id="priority">
+                    <option value="all">All</option>
+                    <option value="HIGH">High</option>
+                    <option value="MEDIUM">Medium</option>
+                    <option value="LOW">Low</option>
+                </select>
+            </div>
+        </div>
+        <div>
+            <label for="project">Project</label>
+            <div class="styled-select styled-select--color-gray">
+                <select id="project">
+                    <option value="all">All</option>
+                </select>
+            </div>
+        </div>
+        <div>
+            <label for="process">Process</label>
+            <div class="styled-select styled-select--color-gray">
+                <select id="process">
+                    <option value="all">All</option>
+                </select>
+            </div>
+        </div>
+        <button class="btn" id="apply_filter">Refresh</button>
+    </div>
+
+    <div class="card-large" data-collapsed="0">
+        <h2 class="card-large__header">Source Data</h2>
+        <div class="card-large__body">
+            <div class="logs__wrapper">
+                <div class="logs__content">
+                    {% include 'reports/all_logs_table.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load static %}
+{% load extras %}
+{% block content %}
+
+<h1>Show Report</h1>
+
+Here we show the report...
+
+{{ report }}
+
+{{ report.items }}
+{{ report.name }}
+{{ report.description }}
+{{ report.name }}
+
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="{% static 'streamprocessors/js/raphael-min.js' %}"></script>
+  <script src="{% static 'streamprocessors/js/morris.min.js' %}"></script>
+{% endblock %}

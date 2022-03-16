@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+    <h2 class="project-name">{{ current_project }}</h2>
+    <h2 class="dashboard__header">Data Extract</h2>
+    <div class="empty">
+        <img src="{% static 'design/images/empty.svg' %}"
+             width="155" height="134" alt="no data" class="empty__image">
+    </div>
+
+{% endblock %}
+
